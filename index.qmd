@@ -1,0 +1,13 @@
+---
+title: "Joyi Zhang"
+image: "files/profile_pic.jpg"
+about:
+  template: jolla
+  links:
+    - icon: envelope
+      href: mailto:joyi.zhang2003@gmail.com
+    - icon: linkedin
+      href: https://www.linkedin.com/in/joyi-zhang-731331341
+---
+
+Welcome to my website!
