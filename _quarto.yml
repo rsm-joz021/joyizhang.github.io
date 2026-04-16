@@ -12,6 +12,8 @@ website:
         text: Resume
       - href: projects.qmd
         text: Projects
+      - href: abtest.qmd
+        text: A/B Test
 
 format:
   html:

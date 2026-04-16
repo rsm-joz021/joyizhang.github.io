@@ -1,0 +1,5 @@
+# RSM VS Code generated files
+.devcontainer/
+
+/.quarto/
+**/*.quarto_ipynb
