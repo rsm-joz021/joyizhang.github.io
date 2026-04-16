@@ -45,8 +45,6 @@ where $\bar{X}_A = \hat{\pi}_A$ is the observed sign-up rate in group A and $\ba
 
 ## Simulating Data
 
-## Simulating Data
-
 In a real A/B test, we would not know the true values of $\pi_A$ and $\pi_B$. We would only observe a sample of user outcomes and try to learn about the underlying sign-up probabilities from that sample. For this exercise, however, it is helpful to set the true probabilities ourselves so that we can evaluate how well our statistical tools recover the truth.
 
 Suppose the true sign-up probability is $\pi_A = 0.22$ for CTA A and $\pi_B = 0.18$ for CTA B. Then the true difference is
@@ -115,8 +113,6 @@ At the beginning of the plot, the running average moves around quite a bit. That
 
 The main takeaway is that noisy early results do not necessarily mean the estimator is unreliable. Instead, they reflect the fact that small samples are inherently variable. As more observations accumulate, random fluctuations begin to average out, and the estimate settles down. This is the practical value of the Law of Large Numbers in A/B testing: large samples make our estimates more trustworthy.
 
-
-## Bootstrap Standard Errors
 
 ## Bootstrap Standard Errors
 
@@ -293,8 +289,6 @@ The sign of the test statistic tells me the direction of the estimated effect. A
 
 If the p-value is small, that means the observed difference would be unlikely under $H_0$, giving evidence against the null. If the p-value is not small, then the data do not provide strong enough evidence to rule out the possibility that the observed difference is just random sampling variation. In this simulation, because the true treatment effect is positive, I would generally expect to see a positive test statistic and often a fairly small p-value, though the exact result depends on the random draw.
 
-
-## The T-Test as a Regression
 
 ## The T-Test as a Regression
 
