@@ -19,5 +19,8 @@
   },
   "abtest.qmd": {
     "abtest.html": "4ae54eb4"
+  },
+  "projects/project1/hw2_replication.qmd": {
+    "hw2_replication.html": "6bf51cda"
   }
 }
