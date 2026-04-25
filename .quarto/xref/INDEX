@@ -22,5 +22,8 @@
   },
   "projects/project1/hw2_replication.qmd": {
     "hw2_replication.html": "6bf51cda"
+  },
+  "articles.qmd": {
+    "articles.html": "24ba0e91"
   }
 }

@@ -1,9 +1,9 @@
 [
   {
-    "listing": "/projects.html",
+    "listing": "/articles.html",
     "items": [
-      "/projects/project1/hw2_replication.html",
-      "/projects/project2/index.html"
+      "/abtest.html",
+      "/projects/project1/hw2_replication.html"
     ]
   }
 ]

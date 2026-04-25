@@ -1,0 +1,10 @@
+---
+title: "Articles"
+listing:
+  contents:
+    - abtest.qmd
+    - projects/project1/hw2_replication.qmd
+  type: grid
+  sort: "date desc"
+  fields: [date, title, description, categories]
+---

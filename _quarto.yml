@@ -8,12 +8,10 @@ website:
     left:
       - href: index.qmd
         text: About
-      - href: resume.qmd
-        text: Resume
+      - href: articles.qmd
+        text: Articles
       - href: projects.qmd
         text: Projects
-      - href: abtest.qmd
-        text: A/B Test
 
 format:
   html:

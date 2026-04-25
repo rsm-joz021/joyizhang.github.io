@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>My Projects – quarto_website</title>
+<title>Projects – quarto_website</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -30,8 +30,6 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-listing/list.min.js"></script>
-<script src="site_libs/quarto-listing/quarto-listing.js"></script>
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
@@ -70,70 +68,12 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
-<script>
 
-  window.document.addEventListener("DOMContentLoaded", function (_event) {
-    const listingTargetEl = window.document.querySelector('#listing-listing .list');
-    if (!listingTargetEl) {
-      // No listing discovered, do not attach.
-      return; 
-    }
-
-    const options = {
-      valueNames: ['listing-title','listing-author','listing-date','listing-image','listing-description',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
-      
-      searchColumns: ["listing-title","listing-author","listing-date","listing-image","listing-description"],
-    };
-
-    window['quarto-listings'] = window['quarto-listings'] || {};
-    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
-
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  });
-
-  window.addEventListener('hashchange',() => {
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  })
-  </script>
-
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-fixed quarto-light">
+<body class="nav-fixed fullcontent quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -155,16 +95,12 @@ window.Quarto = {
 <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./resume.html"> 
-<span class="menu-text">Resume</span></a>
+    <a class="nav-link" href="./articles.html"> 
+<span class="menu-text">Articles</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link active" href="./projects.html" aria-current="page"> 
 <span class="menu-text">Projects</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./abtest.html"> 
-<span class="menu-text">A/B Test</span></a>
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
@@ -177,15 +113,13 @@ window.Quarto = {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
-    </div>
+    
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">My Projects</h1>
+<h1 class="title">Projects</h1>
 </div>
 
 
@@ -202,53 +136,268 @@ window.Quarto = {
 </header>
 
 
+<section id="visualizations" class="level2">
+<h2 class="anchored" data-anchor-id="visualizations">Visualizations</h2>
+<div class="viz-gallery">
 
-
-
-
-<div class="quarto-listing quarto-listing-container-grid" id="listing-listing">
-<div class="list grid quarto-listing-cols-3">
-<div class="g-col-1" data-index="0" data-listing-date-sort="1776841200000" data-listing-file-modified-sort="1776926414272" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2185">
-<a href="./projects/project1/hw2_replication.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-left">
-<p class="card-img-top"><img src="projects/project1/hw2_replication_files/figure-html/fig-red-blue-output-1.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Replication of Karlan and List (2007)
-</h5>
-<div class="card-text listing-description delink">
-Karlan and List (2007) conducted a large-scale natural field experiment to study whether the “price” of charitable giving—manipulated through matching grants—affects donor…
-</div>
-<div class="card-attribution card-text-small justify">
-<div class="listing-author">
-Your Name
-</div>
-<div class="listing-date">
-Apr 22, 2026
-</div>
-</div>
-</div>
-</div></a>
-</div>
-<div class="g-col-1" data-index="1" data-listing-file-modified-sort="1775632975744">
-<a href="./projects/project2/index.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-left">
-<div class="listing-item-img-placeholder card-img-top" style="height: 150px;">&nbsp;</div>
-<div class="card-body post-contents">
-<div class="card-text listing-description delink">
+  <div class="viz-card" onclick="openViz('https://public.tableau.com/views/telcocustomerchurn_17688971802380/Story1?:language=en-US&amp;:tabs=yes&amp;:display_count=n&amp;:showVizHome=no&amp;:embed=true')">
+    <div class="viz-card-thumb">
+      <img src="https://public.tableau.com/static/images/te/telcocustomerchurn_17688971802380/Story1/1.png" alt="Telco Customer Churn">
+      <div class="viz-card-overlay">
+        <span>Click to Explore</span>
+      </div>
+    </div>
+    <div class="viz-card-info">
+      <h3 class="anchored">Telco Customer Churn</h3>
+      <p>4-story Tableau dashboard exploring churn demographics, contract patterns, service usage, and key churn predictors.</p>
+    </div>
+  </div>
 
 </div>
-<div class="card-attribution card-text-small start">
-<div class="listing-author">
+
+<!-- Modal overlay -->
+<div id="viz-modal-overlay" onclick="closeVizOverlay(event)">
+  <div class="viz-modal-box">
+    <button class="viz-modal-close" onclick="closeViz()">×</button>
+    <iframe id="viz-modal-iframe" class="viz-modal-iframe" src="" allowfullscreen=""></iframe>
+  </div>
+</div>
+
+<script>
+function openViz(url) {
+  document.getElementById('viz-modal-iframe').src = url;
+  document.getElementById('viz-modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeViz() {
+  document.getElementById('viz-modal-overlay').classList.remove('open');
+  document.getElementById('viz-modal-iframe').src = '';
+  document.body.style.overflow = '';
+}
+function closeVizOverlay(e) {
+  if (e.target === document.getElementById('viz-modal-overlay')) closeViz();
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeViz();
+});
+</script>
+</section>
+<section id="data-analytics" class="level2">
+<h2 class="anchored" data-anchor-id="data-analytics">Data Analytics</h2>
+<div class="coming-soon">
+<p>Projects coming soon.</p>
+</div>
+</section>
+<section id="sql" class="level2">
+<h2 class="anchored" data-anchor-id="sql">SQL</h2>
+<div class="sql-grid">
+
+  <div class="sql-card" onclick="toggleSQL(this)">
+    <div class="sql-card-header">
+      <span class="sql-case-badge">Case 1</span>
+      <span class="sql-emoji">🍜</span>
+      <div class="sql-title-block">
+        <h3 class="anchored">Danny's Diner</h3>
+        <p class="sql-subtitle">Restaurant loyalty analytics</p>
+      </div>
+      <span class="sql-chevron">▸</span>
+    </div>
+    <div class="sql-card-details">
+      <div class="sql-card-details-inner">
+        <p class="sql-desc">Answer 10 business questions on customer visit frequency, spending habits, and loyalty point accrual for a Japanese restaurant.</p>
+        <div class="sql-chips">
+          <span class="sql-chip">CTEs</span>
+          <span class="sql-chip">Aggregation</span>
+          <span class="sql-chip">Window Functions</span>
+          <span class="sql-chip">CASE WHEN</span>
+        </div>
+        <a class="sql-link" href="https://github.com/katiehuangx/8-Week-SQL-Challenge/tree/main/Case%20Study%20%231%20-%20Danny's%20Diner" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="sql-card" onclick="toggleSQL(this)">
+    <div class="sql-card-header">
+      <span class="sql-case-badge">Case 2</span>
+      <span class="sql-emoji">🍕</span>
+      <div class="sql-title-block">
+        <h3 class="anchored">Pizza Runner</h3>
+        <p class="sql-subtitle">Food delivery operations</p>
+      </div>
+      <span class="sql-chevron">▸</span>
+    </div>
+    <div class="sql-card-details">
+      <div class="sql-card-details-inner">
+        <p class="sql-desc">Clean messy runner and order data, then answer 30+ questions across pizza metrics, runner experience, and ingredient optimisation for a delivery startup.</p>
+        <div class="sql-chips">
+          <span class="sql-chip">Data Cleaning</span>
+          <span class="sql-chip">Complex JOINs</span>
+          <span class="sql-chip">String Functions</span>
+          <span class="sql-chip">CTEs</span>
+        </div>
+        <a class="sql-link" href="https://github.com/katiehuangx/8-Week-SQL-Challenge/tree/main/Case%20Study%20%232%20-%20Pizza%20Runner" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="sql-card" onclick="toggleSQL(this)">
+    <div class="sql-card-header">
+      <span class="sql-case-badge">Case 3</span>
+      <span class="sql-emoji">🥑</span>
+      <div class="sql-title-block">
+        <h3 class="anchored">Foodie-Fi</h3>
+        <p class="sql-subtitle">Subscription analytics</p>
+      </div>
+      <span class="sql-chevron">▸</span>
+    </div>
+    <div class="sql-card-details">
+      <div class="sql-card-details-inner">
+        <p class="sql-desc">Track plan upgrades, downgrades, and churn for a streaming service; model payment schedules and forecast business outcomes.</p>
+        <div class="sql-chips">
+          <span class="sql-chip">Date Functions</span>
+          <span class="sql-chip">CASE WHEN</span>
+          <span class="sql-chip">Window Functions</span>
+          <span class="sql-chip">Churn Analysis</span>
+        </div>
+        <a class="sql-link" href="https://github.com/katiehuangx/8-Week-SQL-Challenge/tree/main/Case%20Study%20%233%20-%20Foodie-Fi" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="sql-card" onclick="toggleSQL(this)">
+    <div class="sql-card-header">
+      <span class="sql-case-badge">Case 4</span>
+      <span class="sql-emoji">🏦</span>
+      <div class="sql-title-block">
+        <h3 class="anchored">Data Bank</h3>
+        <p class="sql-subtitle">Digital banking data</p>
+      </div>
+      <span class="sql-chevron">▸</span>
+    </div>
+    <div class="sql-card-details">
+      <div class="sql-card-details-inner">
+        <p class="sql-desc">Map customer nodes across banking regions and model cloud storage allocation linked to account balance activity for a digital-first bank.</p>
+        <div class="sql-chips">
+          <span class="sql-chip">Window Functions</span>
+          <span class="sql-chip">Distribution</span>
+          <span class="sql-chip">Partitioning</span>
+          <span class="sql-chip">Percentile</span>
+        </div>
+        <a class="sql-link" href="https://github.com/katiehuangx/8-Week-SQL-Challenge/tree/main/Case%20Study%20%234%20-%20Data%20Bank" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="sql-card" onclick="toggleSQL(this)">
+    <div class="sql-card-header">
+      <span class="sql-case-badge">Case 5</span>
+      <span class="sql-emoji">🛒</span>
+      <div class="sql-title-block">
+        <h3 class="anchored">Data Mart</h3>
+        <p class="sql-subtitle">Retail before/after analysis</p>
+      </div>
+      <span class="sql-chevron">▸</span>
+    </div>
+    <div class="sql-card-details">
+      <div class="sql-card-details-inner">
+        <p class="sql-desc">Quantify the sales impact of a sustainable packaging rollout across platforms, regions, and demographics for an international online supermarket.</p>
+        <div class="sql-chips">
+          <span class="sql-chip">DATE_TRUNC</span>
+          <span class="sql-chip">Before/After Analysis</span>
+          <span class="sql-chip">Segmentation</span>
+          <span class="sql-chip">Large Datasets</span>
+        </div>
+        <a class="sql-link" href="https://github.com/katiehuangx/8-Week-SQL-Challenge/tree/main/Case%20Study%20%235%20-%20Data%20Mart" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="sql-card" onclick="toggleSQL(this)">
+    <div class="sql-card-header">
+      <span class="sql-case-badge">Case 6</span>
+      <span class="sql-emoji">🐟</span>
+      <div class="sql-title-block">
+        <h3 class="anchored">Clique Bait</h3>
+        <p class="sql-subtitle">E-commerce funnel analytics</p>
+      </div>
+      <span class="sql-chevron">▸</span>
+    </div>
+    <div class="sql-card-details">
+      <div class="sql-card-details-inner">
+        <p class="sql-desc">Build a digital marketing funnel and analyze product page views, cart adds, and purchase rates for an online seafood retailer.</p>
+        <div class="sql-chips">
+          <span class="sql-chip">Funnel Analysis</span>
+          <span class="sql-chip">Self-JOINs</span>
+          <span class="sql-chip">Product Analytics</span>
+          <span class="sql-chip">Attribution</span>
+        </div>
+        <a class="sql-link" href="https://github.com/katiehuangx/8-Week-SQL-Challenge/tree/main/Case%20Study%20%236%20-%20Clique%20Bait" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="sql-card" onclick="toggleSQL(this)">
+    <div class="sql-card-header">
+      <span class="sql-case-badge">Case 7</span>
+      <span class="sql-emoji">👔</span>
+      <div class="sql-title-block">
+        <h3 class="anchored">Balanced Tree Clothing</h3>
+        <p class="sql-subtitle">Fashion retail reporting</p>
+      </div>
+      <span class="sql-chevron">▸</span>
+    </div>
+    <div class="sql-card-details">
+      <div class="sql-card-details-inner">
+        <p class="sql-desc">Generate full quarterly financial and merchandising reports including revenue by segment, top-selling products, discount analysis, and penetration rates.</p>
+        <div class="sql-chips">
+          <span class="sql-chip">Revenue Analysis</span>
+          <span class="sql-chip">Segment Reporting</span>
+          <span class="sql-chip">Penetration Metrics</span>
+          <span class="sql-chip">CTEs</span>
+        </div>
+        <a class="sql-link" href="https://github.com/katiehuangx/8-Week-SQL-Challenge/tree/main/Case%20Study%20%237%20-%20Balanced%20Tree%20Clothing%20Co." target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="sql-card" onclick="toggleSQL(this)">
+    <div class="sql-card-header">
+      <span class="sql-case-badge">Case 8</span>
+      <span class="sql-emoji">🍊</span>
+      <div class="sql-title-block">
+        <h3 class="anchored">Fresh Segments</h3>
+        <p class="sql-subtitle">Digital marketing analytics</p>
+      </div>
+      <span class="sql-chevron">▸</span>
+    </div>
+    <div class="sql-card-details">
+      <div class="sql-card-details-inner">
+        <p class="sql-desc">Explore interest composition scores, rank customer segments by engagement metrics, and assess data quality for a digital marketing agency's client dataset.</p>
+        <div class="sql-chips">
+          <span class="sql-chip">Interest Metrics</span>
+          <span class="sql-chip">Statistical Aggregation</span>
+          <span class="sql-chip">Data Quality</span>
+          <span class="sql-chip">Ranking</span>
+        </div>
+        <a class="sql-link" href="https://github.com/katiehuangx/8-Week-SQL-Challenge/tree/main/Case%20Study%20%238%3A%20Fresh%20Segments" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
+      </div>
+    </div>
+  </div>
 
 </div>
-</div>
-</div>
-</div></a>
-</div>
-</div>
-<div class="listing-no-matching d-none">No matching items</div>
-</div></main> <!-- /main -->
+
+<script>
+function toggleSQL(card) {
+  const wasOpen = card.classList.contains('open');
+  document.querySelectorAll('.sql-card.open').forEach(c => c.classList.remove('open'));
+  if (!wasOpen) card.classList.add('open');
+}
+</script>
+
+
+</section>
+
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

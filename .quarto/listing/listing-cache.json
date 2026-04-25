@@ -1,7 +1,8 @@
 {
   "listingMap": {
-    "projects.qmd": [
-      "projects"
+    "articles.qmd": [
+      "abtest.qmd",
+      "projects/project1/hw2_replication.qmd"
     ]
   }
 }

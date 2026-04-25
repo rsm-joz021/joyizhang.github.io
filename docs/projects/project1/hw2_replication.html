@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Your Name">
-<meta name="dcterms.date" content="2026-04-22">
+<meta name="author" content="Joyi Zhang">
+<meta name="dcterms.date" content="2026-04-24">
+<meta name="description" content="Replicating Karlan &amp; List (2007) to examine how matching grant ratios affect charitable donation rates using a large-scale natural field experiment.">
 
 <title>Replication of Karlan and List (2007) – quarto_website</title>
 <style>
@@ -135,16 +136,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../resume.html"> 
-<span class="menu-text">Resume</span></a>
+    <a class="nav-link" href="../../articles.html"> 
+<span class="menu-text">Articles</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="../../projects.html"> 
 <span class="menu-text">Projects</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../../abtest.html"> 
-<span class="menu-text">A/B Test</span></a>
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
@@ -186,8 +183,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="quarto-title">
 <h1 class="title">Replication of Karlan and List (2007)</h1>
 <p class="subtitle lead">Does Price Matter in Charitable Giving? Evidence from a Large-Scale Natural Field Experiment</p>
-</div>
+  <div class="quarto-categories">
+    <div class="quarto-category">Causal Inference</div>
+    <div class="quarto-category">Econometrics</div>
+  </div>
+  </div>
 
+<div>
+  <div class="description">
+    Replicating Karlan &amp; List (2007) to examine how matching grant ratios affect charitable donation rates using a large-scale natural field experiment.
+  </div>
+</div>
 
 
 <div class="quarto-title-meta">
@@ -195,14 +201,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Your Name </p>
+             <p>Joyi Zhang </p>
           </div>
   </div>
     
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">April 22, 2026</p>
+      <p class="date">April 24, 2026</p>
     </div>
   </div>
   
@@ -227,7 +233,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="data" class="level2">
 <h2 class="anchored" data-anchor-id="data">Data</h2>
-<div id="d5f93e32" class="cell" data-execution_count="1">
+<div id="e64f8310" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -515,7 +521,7 @@ Table&nbsp;2: Mean Responses by Treatment (Replication of Table 2A, Panel A)
 </section>
 <section id="t-test-treatment-vs.-control" class="level3">
 <h3 class="anchored" data-anchor-id="t-test-treatment-vs.-control">T-test: Treatment vs.&nbsp;Control</h3>
-<div id="ca12602b" class="cell" data-execution_count="4">
+<div id="3c033706" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Show Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>

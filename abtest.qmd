@@ -1,8 +1,11 @@
 ---
 title: "A/B Testing a Call to Action"
 subtitle: "Simulating Key Ideas from Classical Frequentist Statistics"
+description: "Simulating frequentist statistics concepts through a mock A/B test on call-to-action button design — t-tests, p-values, and sample size tradeoffs."
 author: "Joyi Zhang"
 date: today
+categories: [Statistics, A/B Testing]
+image: files/thumb_abtest.svg
 format:
   html:
     toc: true
