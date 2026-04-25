@@ -81,7 +81,7 @@ Projects coming soon.
           <span class="sql-chip">Window Functions</span>
           <span class="sql-chip">CASE WHEN</span>
         </div>
-        <a class="sql-link" href="https://github.com/katiehuangx/8-Week-SQL-Challenge/tree/main/Case%20Study%20%231%20-%20Danny's%20Diner" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
+        <a class="sql-link" href="https://github.com/rsm-joz021/8-SQL-Challenges/tree/main/Case%20Study%20%231%20-%20Danny's%20Diner" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
       </div>
     </div>
   </div>
@@ -105,7 +105,7 @@ Projects coming soon.
           <span class="sql-chip">String Functions</span>
           <span class="sql-chip">CTEs</span>
         </div>
-        <a class="sql-link" href="https://github.com/katiehuangx/8-Week-SQL-Challenge/tree/main/Case%20Study%20%232%20-%20Pizza%20Runner" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
+        <a class="sql-link" href="https://github.com/rsm-joz021/8-SQL-Challenges/tree/main/Case%20Study%20%232%20-%20Pizza%20Runner" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
       </div>
     </div>
   </div>
@@ -129,7 +129,7 @@ Projects coming soon.
           <span class="sql-chip">Window Functions</span>
           <span class="sql-chip">Churn Analysis</span>
         </div>
-        <a class="sql-link" href="https://github.com/katiehuangx/8-Week-SQL-Challenge/tree/main/Case%20Study%20%233%20-%20Foodie-Fi" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
+        <a class="sql-link" href="https://github.com/rsm-joz021/8-SQL-Challenges/tree/main/Case%20Study%20%233%20-%20Foodie-Fi" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
       </div>
     </div>
   </div>
@@ -153,7 +153,7 @@ Projects coming soon.
           <span class="sql-chip">Partitioning</span>
           <span class="sql-chip">Percentile</span>
         </div>
-        <a class="sql-link" href="https://github.com/katiehuangx/8-Week-SQL-Challenge/tree/main/Case%20Study%20%234%20-%20Data%20Bank" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
+        <a class="sql-link" href="https://github.com/rsm-joz021/8-SQL-Challenges/tree/main/Case%20Study%20%234%20-%20Data%20Bank" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
       </div>
     </div>
   </div>
@@ -177,7 +177,7 @@ Projects coming soon.
           <span class="sql-chip">Segmentation</span>
           <span class="sql-chip">Large Datasets</span>
         </div>
-        <a class="sql-link" href="https://github.com/katiehuangx/8-Week-SQL-Challenge/tree/main/Case%20Study%20%235%20-%20Data%20Mart" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
+        <a class="sql-link" href="https://github.com/rsm-joz021/8-SQL-Challenges/tree/main/Case%20Study%20%235%20-%20Data%20Mart" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
       </div>
     </div>
   </div>
@@ -201,7 +201,7 @@ Projects coming soon.
           <span class="sql-chip">Product Analytics</span>
           <span class="sql-chip">Attribution</span>
         </div>
-        <a class="sql-link" href="https://github.com/katiehuangx/8-Week-SQL-Challenge/tree/main/Case%20Study%20%236%20-%20Clique%20Bait" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
+        <a class="sql-link" href="https://github.com/rsm-joz021/8-SQL-Challenges/tree/main/Case%20Study%20%236%20-%20Clique%20Bait" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
       </div>
     </div>
   </div>
@@ -225,7 +225,7 @@ Projects coming soon.
           <span class="sql-chip">Penetration Metrics</span>
           <span class="sql-chip">CTEs</span>
         </div>
-        <a class="sql-link" href="https://github.com/katiehuangx/8-Week-SQL-Challenge/tree/main/Case%20Study%20%237%20-%20Balanced%20Tree%20Clothing%20Co." target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
+        <a class="sql-link" href="https://github.com/rsm-joz021/8-SQL-Challenges/tree/main/Case%20Study%20%237%20-%20Balanced%20Tree%20Clothing%20Co" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
       </div>
     </div>
   </div>
@@ -249,7 +249,7 @@ Projects coming soon.
           <span class="sql-chip">Data Quality</span>
           <span class="sql-chip">Ranking</span>
         </div>
-        <a class="sql-link" href="https://github.com/katiehuangx/8-Week-SQL-Challenge/tree/main/Case%20Study%20%238%3A%20Fresh%20Segments" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
+        <a class="sql-link" href="https://github.com/rsm-joz021/8-SQL-Challenges/tree/main/Case%20Study%20%238_%20Fresh%20Segments" target="_blank" onclick="event.stopPropagation()">View Solution ↗</a>
       </div>
     </div>
   </div>
