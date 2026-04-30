@@ -2,12 +2,23 @@
 title: "Telco Customer Churn Analysis"
 description: "Interactive Tableau dashboard exploring customer churn patterns and key drivers in a telecommunications company."
 date: "2024-12-01"
-categories: [Tableau, Data Visualization]
+categories: [Tableau, Data Visualization, Customer Analytics, Churn]
 ---
 
-This project analyzes customer churn in a telecom dataset using Tableau. The dashboard covers four stories: an overview of churn demographics, contract and billing patterns, service usage behavior, and a summary of key churn predictors.
+## Background
 
-Use the tabs at the top to navigate between all four stories.
+Customer churn — when customers stop doing business with a company — is one of the most expensive problems in the telecom industry. Acquiring a new customer typically costs five to seven times more than retaining an existing one, so understanding *who* churns and *why* is critical for any subscription-based business.
+
+This project explores a public Telco customer dataset of roughly 7,000 subscribers, each described by demographic attributes (gender, senior citizen status, partner/dependents), account information (tenure, contract type, payment method, monthly charges), and the services they subscribe to (phone, internet, streaming, tech support, etc.). The goal is to identify the strongest churn drivers and translate them into actionable retention strategies.
+
+## Dashboard Overview
+
+The dashboard is organized as a four-part story. Use the tabs at the top to move between sections:
+
+1. **Demographics** — How churn rates differ across gender, age group, and family status.
+2. **Contract & Billing** — The relationship between contract length, payment method, monthly charges, and churn.
+3. **Service Usage** — Which add-on services (online security, tech support, streaming) correlate with retention.
+4. **Key Predictors** — A summary of the strongest churn drivers and what they imply for retention strategy.
 
 ```{=html}
 <div class='tableauPlaceholder' id='viz_telco' style='position: relative; margin: 1.5rem 0;'>
@@ -44,3 +55,26 @@ Use the tabs at the top to navigate between all four stories.
   vizElement.parentNode.insertBefore(scriptElement, vizElement);
 </script>
 ```
+
+## Key Findings
+
+Several patterns emerge consistently across the four stories:
+
+- **Contract length is the single strongest predictor of churn.** Customers on month-to-month contracts churn at a dramatically higher rate than those on one- or two-year contracts. Locking customers into longer agreements — through discounts or bundled perks — is likely the highest-leverage retention move.
+- **Tenure matters more than demographics.** New customers (under 12 months of tenure) are far more likely to leave than long-tenured ones, regardless of age or gender. The first year is the critical retention window.
+- **Fiber optic internet customers churn more than expected**, despite paying premium prices. This suggests a service-quality or price-perception issue worth investigating further.
+- **Add-on services reduce churn.** Customers with online security, tech support, or device protection are noticeably stickier — these services likely increase switching costs and perceived value.
+- **Payment method correlates with churn**, with electronic check users churning at the highest rate. This may reflect a less-engaged customer segment rather than a causal effect of the payment method itself.
+
+## Recommendations
+
+Based on the patterns above, three retention levers stand out:
+
+1. **Migrate month-to-month customers to longer contracts** through targeted offers, especially in the first 6–12 months of tenure.
+2. **Audit the fiber optic experience** — both technical reliability and pricing — to understand why these high-value customers are leaving.
+3. **Bundle add-on services** (security, tech support) into base plans for at-risk segments to increase stickiness without aggressive discounting.
+
+## Notes
+
+- Dataset: IBM Telco Customer Churn (publicly available on Kaggle).
+- Built in Tableau Public; the embed above is fully interactive — hover, filter, and click through all four stories.
