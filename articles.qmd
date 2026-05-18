@@ -2,6 +2,7 @@
 title: "Articles"
 listing:
   contents:
+    - mle_blueprinty.qmd
     - abtest.qmd
     - projects/project1/hw2_replication.qmd
   type: grid
