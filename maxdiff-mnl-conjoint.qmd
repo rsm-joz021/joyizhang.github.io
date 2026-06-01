@@ -99,14 +99,14 @@ summary = pd.DataFrame({
         "Respondents",
         "Tasks per respondent, median",
         "Rows in raw data",
-        "Unique classes",
+        "Labeled classes",
         "Complete tasks"
     ],
     "Value": [
         choices["record_id"].nunique(),
         task_checks.groupby("record_id")["task"].nunique().median(),
         len(choices),
-        choices["item"].nunique(),
+        len(labels),
         ((task_checks["rows"] == 4) &
          (task_checks["n_best"] == 1) &
          (task_checks["n_worst"] == 1) &
