@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Joyi Zhang">
-<meta name="dcterms.date" content="2026-05-30">
+<meta name="dcterms.date" content="2026-05-31">
 <meta name="description" content="A MaxDiff analysis of MSBA course preferences using counts, maximum likelihood MNL, and Bayesian MNL.">
 
 <title>MaxDiff Analysis of MSBA Class Preferences – quarto_website</title>
@@ -233,7 +233,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">May 30, 2026</p>
+      <p class="date">May 31, 2026</p>
     </div>
   </div>
   
@@ -384,14 +384,14 @@ window.Quarto = {
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Respondents"</span>,</span>
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Tasks per respondent, median"</span>,</span>
 <span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Rows in raw data"</span>,</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Unique classes"</span>,</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Labeled classes"</span>,</span>
 <span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Complete tasks"</span></span>
 <span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    ],</span>
 <span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Value"</span>: [</span>
 <span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        choices[<span class="st">"record_id"</span>].nunique(),</span>
 <span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        task_checks.groupby(<span class="st">"record_id"</span>)[<span class="st">"task"</span>].nunique().median(),</span>
 <span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        <span class="bu">len</span>(choices),</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>        choices[<span class="st">"item"</span>].nunique(),</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>        <span class="bu">len</span>(labels),</span>
 <span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>        ((task_checks[<span class="st">"rows"</span>] <span class="op">==</span> <span class="dv">4</span>) <span class="op">&amp;</span></span>
 <span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>         (task_checks[<span class="st">"n_best"</span>] <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span></span>
 <span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>         (task_checks[<span class="st">"n_worst"</span>] <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span></span>
@@ -431,8 +431,8 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">3</th>
-<td>Unique classes</td>
-<td>11.0</td>
+<td>Labeled classes</td>
+<td>10.0</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">4</th>
