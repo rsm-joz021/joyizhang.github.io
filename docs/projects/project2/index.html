@@ -115,8 +115,18 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background">Background</a></li>
+  <li><a href="#dashboard-overview" id="toc-dashboard-overview" class="nav-link" data-scroll-target="#dashboard-overview">Dashboard Overview</a></li>
+  <li><a href="#key-findings" id="toc-key-findings" class="nav-link" data-scroll-target="#key-findings">Key Findings</a></li>
+  <li><a href="#recommendations" id="toc-recommendations" class="nav-link" data-scroll-target="#recommendations">Recommendations</a></li>
+  <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">Notes</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -127,6 +137,8 @@ ul.task-list li input[type="checkbox"] {
   <div class="quarto-categories">
     <div class="quarto-category">Tableau</div>
     <div class="quarto-category">Data Visualization</div>
+    <div class="quarto-category">Customer Analytics</div>
+    <div class="quarto-category">Churn</div>
   </div>
   </div>
 
@@ -155,8 +167,20 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>This project analyzes customer churn in a telecom dataset using Tableau. The dashboard covers four stories: an overview of churn demographics, contract and billing patterns, service usage behavior, and a summary of key churn predictors.</p>
-<p>Use the tabs at the top to navigate between all four stories.</p>
+<section id="background" class="level2">
+<h2 class="anchored" data-anchor-id="background">Background</h2>
+<p>Customer churn — when customers stop doing business with a company — is one of the most expensive problems in the telecom industry. Acquiring a new customer typically costs five to seven times more than retaining an existing one, so understanding <em>who</em> churns and <em>why</em> is critical for any subscription-based business.</p>
+<p>This project explores a public Telco customer dataset of roughly 7,000 subscribers, each described by demographic attributes (gender, senior citizen status, partner/dependents), account information (tenure, contract type, payment method, monthly charges), and the services they subscribe to (phone, internet, streaming, tech support, etc.). The goal is to identify the strongest churn drivers and translate them into actionable retention strategies.</p>
+</section>
+<section id="dashboard-overview" class="level2">
+<h2 class="anchored" data-anchor-id="dashboard-overview">Dashboard Overview</h2>
+<p>The dashboard is organized as a four-part story. Use the tabs at the top to move between sections:</p>
+<ol type="1">
+<li><strong>Demographics</strong> — How churn rates differ across gender, age group, and family status.</li>
+<li><strong>Contract &amp; Billing</strong> — The relationship between contract length, payment method, monthly charges, and churn.</li>
+<li><strong>Service Usage</strong> — Which add-on services (online security, tech support, streaming) correlate with retention.</li>
+<li><strong>Key Predictors</strong> — A summary of the strongest churn drivers and what they imply for retention strategy.</li>
+</ol>
 <div class="tableauPlaceholder" id="viz_telco" style="position: relative; margin: 1.5rem 0;">
   <noscript>
     <a href="https://public.tableau.com/app/profile/joyi.zhang/viz/telcocustomerchurn_17688971802380/Story1">
@@ -188,8 +212,36 @@ ul.task-list li input[type="checkbox"] {
   scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
   vizElement.parentNode.insertBefore(scriptElement, vizElement);
 </script>
+</section>
+<section id="key-findings" class="level2">
+<h2 class="anchored" data-anchor-id="key-findings">Key Findings</h2>
+<p>Several patterns emerge consistently across the four stories:</p>
+<ul>
+<li><strong>Contract length is the single strongest predictor of churn.</strong> Customers on month-to-month contracts churn at a dramatically higher rate than those on one- or two-year contracts. Locking customers into longer agreements — through discounts or bundled perks — is likely the highest-leverage retention move.</li>
+<li><strong>Tenure matters more than demographics.</strong> New customers (under 12 months of tenure) are far more likely to leave than long-tenured ones, regardless of age or gender. The first year is the critical retention window.</li>
+<li><strong>Fiber optic internet customers churn more than expected</strong>, despite paying premium prices. This suggests a service-quality or price-perception issue worth investigating further.</li>
+<li><strong>Add-on services reduce churn.</strong> Customers with online security, tech support, or device protection are noticeably stickier — these services likely increase switching costs and perceived value.</li>
+<li><strong>Payment method correlates with churn</strong>, with electronic check users churning at the highest rate. This may reflect a less-engaged customer segment rather than a causal effect of the payment method itself.</li>
+</ul>
+</section>
+<section id="recommendations" class="level2">
+<h2 class="anchored" data-anchor-id="recommendations">Recommendations</h2>
+<p>Based on the patterns above, three retention levers stand out:</p>
+<ol type="1">
+<li><strong>Migrate month-to-month customers to longer contracts</strong> through targeted offers, especially in the first 6–12 months of tenure.</li>
+<li><strong>Audit the fiber optic experience</strong> — both technical reliability and pricing — to understand why these high-value customers are leaving.</li>
+<li><strong>Bundle add-on services</strong> (security, tech support) into base plans for at-risk segments to increase stickiness without aggressive discounting.</li>
+</ol>
+</section>
+<section id="notes" class="level2">
+<h2 class="anchored" data-anchor-id="notes">Notes</h2>
+<ul>
+<li>Dataset: IBM Telco Customer Churn (publicly available on Kaggle).</li>
+<li>Built in Tableau Public; the embed above is fully interactive — hover, filter, and click through all four stories.</li>
+</ul>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
