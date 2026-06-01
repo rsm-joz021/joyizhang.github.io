@@ -1,8 +1,10 @@
 {
   "listingMap": {
     "articles.qmd": [
+      "mle_blueprinty.qmd",
       "abtest.qmd",
-      "projects/project1/hw2_replication.qmd"
+      "projects/project1/hw2_replication.qmd",
+      "maxdiff-mnl-conjoint.qmd"
     ]
   }
 }

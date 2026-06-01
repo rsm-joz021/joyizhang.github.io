@@ -4,6 +4,7 @@ listing:
   contents:
     - mle_blueprinty.qmd
     - abtest.qmd
+    - maxdiff-mnl-conjoint.qmd
     - projects/project1/hw2_replication.qmd
   type: grid
   sort: "date desc"
