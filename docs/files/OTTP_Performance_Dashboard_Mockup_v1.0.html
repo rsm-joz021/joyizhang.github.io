@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>OTTP Performance Dashboard Mockup v1.0</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --primary:#1F4E79; --secondary:#2E75B6; --positive:#70AD47; --negative:#C00000;
+    --highlight:#FFC000; --bg:#F5F7FA; --card:#FFFFFF; --border:#E1E5EA;
+    --text:#595959; --muted:#A0A6AE; --shadow:0 1px 2px rgba(0,0,0,0.04);
+    --baseline:#C00000;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.4;}
+  .nav{background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;height:60px;position:sticky;top:0;z-index:50;gap:14px;}
+  .nav .logo{font-weight:700;color:var(--primary);font-size:17px;white-space:nowrap;}
+  .nav .logo span{color:var(--secondary);font-weight:500;font-size:12px;margin-left:6px;}
+  .nav .title{font-weight:600;color:#1F2328;font-size:15px;margin-left:6px;margin-right:auto;white-space:nowrap;}
+  .nav-buttons{display:flex;gap:3px;flex-shrink:0;flex-wrap:wrap;}
+  .nav-btn{padding:6px 10px;border-radius:6px;font-size:11.5px;color:var(--text);cursor:pointer;border:1px solid transparent;transition:all .15s;white-space:nowrap;user-select:none;}
+  .nav-btn:hover{background:#F2F6FA;color:var(--secondary);}
+  .nav-btn.active{background:var(--primary);color:#fff;font-weight:600;}
+  .slicer-bar{background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:10px 20px;min-height:52px;flex-wrap:wrap;position:sticky;top:60px;z-index:40;}
+  .slicer{display:flex;align-items:center;gap:6px;background:#F5F7FA;border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;position:relative;user-select:none;transition:all .15s;}
+  .slicer:hover{background:#EAF1F8;border-color:var(--secondary);}
+  .slicer.open{background:#EAF1F8;border-color:var(--secondary);box-shadow:0 0 0 3px rgba(46,117,182,.15);}
+  .slicer.filtered{background:#E8F0DC;border-color:var(--positive);}
+  .slicer-label{color:var(--muted);font-size:11px;}
+  .slicer-value{color:var(--primary);font-weight:600;}
+  .slicer-arrow{color:var(--muted);font-size:9px;margin-left:3px;transition:transform .15s;}
+  .slicer.open .slicer-arrow{transform:rotate(180deg);}
+  .slicer-menu{position:absolute;top:calc(100% + 6px);left:0;background:#fff;border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.12);padding:6px 0;min-width:200px;z-index:60;display:none;max-height:300px;overflow-y:auto;}
+  .slicer.open .slicer-menu{display:block;}
+  .slicer-menu-item{padding:7px 14px;cursor:pointer;font-size:12px;color:var(--text);display:flex;align-items:center;gap:8px;}
+  .slicer-menu-item:hover{background:#F2F6FA;color:var(--primary);}
+  .slicer-menu-item.selected{color:var(--primary);font-weight:600;background:#F0F6FC;}
+  .slicer-menu-item.selected::before{content:'✓';color:var(--positive);}
+  .slicer-menu-item:not(.selected)::before{content:'';display:inline-block;width:1ch;}
+  .reset-btn{background:#fff;border:1px solid var(--border);color:var(--negative);padding:6px 12px;border-radius:6px;font-size:11.5px;cursor:pointer;font-weight:600;}
+  .reset-btn:hover{background:#FBE3E3;}
+  .refresh{margin-left:auto;color:var(--muted);font-size:11px;display:flex;align-items:center;gap:6px;}
+  .refresh-dot{width:8px;height:8px;border-radius:50%;background:var(--positive);}
+  .filter-summary{font-size:11px;color:var(--muted);padding:0 20px 8px;}
+  .filter-summary b{color:var(--primary);}
+  main{padding:8px 20px 40px;}
+  .page{display:none;}
+  .page.active{display:block;}
+  .page-title{color:var(--primary);font-size:20px;font-weight:700;margin:6px 0 14px 0;}
+  .page-subtitle{color:var(--muted);font-size:12px;margin-top:-10px;margin-bottom:14px;}
+  .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px;}
+  .kpi-row.k4{grid-template-columns:repeat(4,1fr);}
+  .kpi-row.k3{grid-template-columns:repeat(3,1fr);}
+  .kpi-row.k6{grid-template-columns:repeat(6,1fr);}
+  .kpi{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+  .kpi-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+  .kpi-value{font-size:26px;font-weight:700;color:#1F2328;margin-top:4px;line-height:1.1;}
+  .kpi-sub{font-size:11px;margin-top:4px;display:flex;align-items:center;gap:5px;}
+  .kpi.alert{border-left:4px solid var(--negative);}
+  .kpi.good{border-left:4px solid var(--positive);}
+  .yoy-up,.kpi-worse{color:var(--negative);font-weight:600;}
+  .yoy-down,.kpi-better{color:var(--positive);font-weight:600;}
+  .yoy-blank{color:var(--muted);font-weight:500;font-style:italic;}
+  .kpi.clickable{cursor:pointer;transition:transform .12s,box-shadow .12s;}
+  .kpi.clickable:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(31,78,121,.12);border-color:var(--secondary);}
+  .grid{display:grid;gap:12px;margin-bottom:12px;}
+  .grid-2{grid-template-columns:2fr 1fr;}
+  .grid-2e{grid-template-columns:1fr 1fr;}
+  .grid-3{grid-template-columns:1fr 1fr 1fr;}
+  .grid-23{grid-template-columns:2fr 3fr;}
+  .grid-stack{grid-template-columns:1fr;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;box-shadow:var(--shadow);}
+  .card-title{font-size:13px;font-weight:600;color:#1F2328;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+  .card-title .hint{font-size:11px;color:var(--muted);font-weight:400;}
+  .chart-wrap{position:relative;height:240px;}
+  .chart-wrap.tall{height:320px;}
+  .chart-wrap.short{height:180px;}
+  .takeaways{background:#FFF8E1;border-left:4px solid var(--highlight);border-radius:6px;padding:12px 16px;font-size:12px;}
+  .takeaways b{color:#8B5A00;font-size:13px;}
+  .takeaways ul{margin:6px 0 0 0;padding-left:20px;}
+  .takeaways li{margin:3px 0;}
+  .alert-banner{background:#FBE3E3;border-left:4px solid var(--negative);border-radius:6px;padding:10px 14px;font-size:12px;margin-bottom:12px;color:#7A0000;}
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  thead th{background:var(--primary);color:#fff;font-weight:600;text-align:left;padding:8px 10px;font-size:11.5px;}
+  tbody td{padding:7px 10px;border-bottom:1px solid #F0F2F5;}
+  tbody tr:hover{background:#F8FAFC;}
+  .num{text-align:right;font-variant-numeric:tabular-nums;}
+  .pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:600;}
+  .pill-ontime{background:#E5F3E0;color:var(--positive);}
+  .pill-late{background:#FBE3E3;color:var(--negative);}
+  .pill-severe{background:#7A0000;color:#fff;}
+  .severe-late{background:#FBE3E3;}
+  .late-row{background:#FFF4CE;}
+  .empty-state{display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:13px;text-align:center;padding:20px;}
+  .dict-section{margin-bottom:20px;}
+  .dict-section h4{margin:0 0 10px 0;color:var(--primary);font-size:14px;}
+  .badge{display:inline-block;padding:2px 8px;border-radius:4px;background:var(--primary);color:#fff;font-size:11px;}
+  .badge-adv{background:var(--highlight);color:#8B5A00;}
+  .badge-opt{background:#E0E6EE;color:var(--text);}
+  .badge-mis{background:var(--negative);color:#fff;}
+  .badge-ok{background:var(--positive);color:#fff;}
+  .context-card{background:linear-gradient(135deg,#1F4E79 0%,#2E75B6 100%);color:#fff;border-radius:8px;padding:12px 16px;font-size:12px;}
+  .context-card b{font-size:13px;}
+  .context-tag{display:inline-block;background:rgba(255,255,255,.18);padding:2px 8px;border-radius:10px;margin:2px 4px 2px 0;}
+  .small{font-size:11px;color:var(--muted);}
+  .scroll-x{overflow-x:auto;}
+  .scroll-y{max-height:380px;overflow-y:auto;}
+  .footer-note{font-size:11px;color:var(--muted);text-align:center;padding:14px;}
+  code{font-family:'Consolas','Monaco',monospace;background:#F0F2F5;padding:1px 5px;border-radius:3px;font-size:11.5px;color:#1F2328;}
+  .baseline-tag{display:inline-block;background:#FBE3E3;color:var(--negative);font-weight:600;padding:1px 8px;border-radius:10px;font-size:11px;}
+  .toast{position:fixed;bottom:24px;right:24px;background:#1F2328;color:#fff;padding:10px 16px;border-radius:6px;font-size:12px;box-shadow:0 6px 20px rgba(0,0,0,.2);opacity:0;transform:translateY(10px);transition:all .2s;z-index:100;pointer-events:none;}
+  .toast.show{opacity:1;transform:translateY(0);}
+  .driver-card{padding:8px 10px;background:#F8FAFC;border-radius:6px;margin-bottom:6px;font-size:12px;display:flex;justify-content:space-between;align-items:center;}
+  .driver-card b{color:var(--primary);}
+  .driver-mr{color:var(--negative);font-weight:700;}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="logo">📦 OTTP Performance <span>v1.0</span></div>
+  <div class="title" id="pageTitle">OTTP Executive Summary</div>
+  <div class="nav-buttons">
+    <div class="nav-btn active" data-page="exec">Exec</div>
+    <div class="nav-btn" data-page="trend">Trend</div>
+    <div class="nav-btn" data-page="region">Region/Country</div>
+    <div class="nav-btn" data-page="product">Product</div>
+    <div class="nav-btn" data-page="customer">Customer</div>
+    <div class="nav-btn" data-page="ordertype">OrderType</div>
+    <div class="nav-btn" data-page="carrier">Carrier</div>
+    <div class="nav-btn" data-page="detail">Detail</div>
+    <div class="nav-btn" data-page="dict">Method</div>
+  </div>
+</header>
+
+<div class="slicer-bar" id="slicerBar">
+  <div class="slicer" data-slicer="date">
+    <span class="slicer-label">Date Range</span>
+    <span class="slicer-value" data-value>Last 12 Months</span>
+    <span class="slicer-arrow">▼</span>
+    <div class="slicer-menu" data-menu>
+      <div class="slicer-menu-item">YTD 2026</div>
+      <div class="slicer-menu-item selected">Last 12 Months</div>
+      <div class="slicer-menu-item">Last 24 Months</div>
+      <div class="slicer-menu-item">Q1 2026</div>
+      <div class="slicer-menu-item">2025 Full Year</div>
+    </div>
+  </div>
+  <div class="slicer" data-slicer="region">
+    <span class="slicer-label">Region</span>
+    <span class="slicer-value" data-value>All</span>
+    <span class="slicer-arrow">▼</span>
+    <div class="slicer-menu" data-menu>
+      <div class="slicer-menu-item selected">All</div>
+      <div class="slicer-menu-item">AMER</div>
+      <div class="slicer-menu-item">EMEA</div>
+      <div class="slicer-menu-item">APAC</div>
+    </div>
+  </div>
+  <div class="slicer" data-slicer="catL1">
+    <span class="slicer-label">Product L1</span>
+    <span class="slicer-value" data-value>All</span>
+    <span class="slicer-arrow">▼</span>
+    <div class="slicer-menu" data-menu>
+      <div class="slicer-menu-item selected">All</div>
+      <div class="slicer-menu-item">MOLECULAR BIOLOGY</div>
+      <div class="slicer-menu-item">PROTEIN & CELL ANALYSIS</div>
+      <div class="slicer-menu-item">CELL BIOLOGY</div>
+      <div class="slicer-menu-item">QPCR ASSAYS CONTENT</div>
+      <div class="slicer-menu-item">GENOMIC WORKFLOW</div>
+      <div class="slicer-menu-item">NGS</div>
+    </div>
+  </div>
+  <div class="slicer" data-slicer="orderType">
+    <span class="slicer-label">Order Type</span>
+    <span class="slicer-value" data-value>All</span>
+    <span class="slicer-arrow">▼</span>
+    <div class="slicer-menu" data-menu>
+      <div class="slicer-menu-item selected">All</div>
+      <div class="slicer-menu-item">MTS</div>
+      <div class="slicer-menu-item">MTO</div>
+      <div class="slicer-menu-item">TS</div>
+    </div>
+  </div>
+  <div class="slicer" data-slicer="intercompany">
+    <span class="slicer-label">Intercompany</span>
+    <span class="slicer-value" data-value>All</span>
+    <span class="slicer-arrow">▼</span>
+    <div class="slicer-menu" data-menu>
+      <div class="slicer-menu-item selected">All</div>
+      <div class="slicer-menu-item">Intercompany</div>
+      <div class="slicer-menu-item">Non-Intercompany</div>
+    </div>
+  </div>
+  <button class="reset-btn" id="resetBtn">⟳ Reset</button>
+  <div class="refresh">
+    <span class="refresh-dot"></span>
+    <span>Last Refresh: <b>2026-05-15 08:00</b></span>
+    <span style="color:var(--muted);">· Refresh_Info[Refresh_DateTime]</span>
+  </div>
+</div>
+<div class="filter-summary" id="filterSummary"></div>
+
+<main>
+
+<!-- ============ 1. EXECUTIVE SUMMARY ============ -->
+<section class="page active" id="page-exec">
+  <h2 class="page-title">OTTP Executive Summary</h2>
+  <div class="page-subtitle">Where are we missing? · How far from AMER baseline 19.85%? · How much $ at risk?</div>
+
+  <div class="alert-banner" id="exec-alert"></div>
+
+  <div class="kpi-row k6">
+    <div class="kpi clickable alert" data-jump="trend" id="exec-kpi-missrate">
+      <div class="kpi-label">OTTP Miss Rate</div><div class="kpi-value">—</div><div class="kpi-sub"></div>
+    </div>
+    <div class="kpi clickable good" data-jump="trend" id="exec-kpi-ontime">
+      <div class="kpi-label">On-Time %</div><div class="kpi-value">—</div><div class="kpi-sub"></div>
+    </div>
+    <div class="kpi clickable" data-jump="trend" id="exec-kpi-lines">
+      <div class="kpi-label">Total Eligible Lines</div><div class="kpi-value">—</div><div class="kpi-sub"></div>
+    </div>
+    <div class="kpi clickable alert" data-jump="trend" id="exec-kpi-missedlines">
+      <div class="kpi-label">Missed Lines</div><div class="kpi-value">—</div><div class="kpi-sub"></div>
+    </div>
+    <div class="kpi clickable alert" data-jump="customer" id="exec-kpi-dollarrisk">
+      <div class="kpi-label">Dollar at Risk</div><div class="kpi-value">—</div><div class="kpi-sub"></div>
+    </div>
+    <div class="kpi clickable" data-jump="region" id="exec-kpi-lift">
+      <div class="kpi-label">Lift vs Baseline</div><div class="kpi-value">—</div><div class="kpi-sub"></div>
+    </div>
+  </div>
+
+  <div class="grid grid-23">
+    <div class="card">
+      <div class="card-title">Miss Rate Trend — vs <span class="baseline-tag">AMER Baseline 19.85%</span> <span class="hint">[Line + Reference]</span></div>
+      <div class="chart-wrap tall"><canvas id="execTrend"></canvas></div>
+    </div>
+    <div class="grid grid-stack" style="gap:12px;">
+      <div class="card">
+        <div class="card-title">Top 3 Drivers of Miss <span class="hint">Highest Lift vs Baseline</span></div>
+        <div id="exec-drivers"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Region Miss Rate Comparison <span class="hint">[Bar] · vs Baseline</span></div>
+        <div class="chart-wrap short"><canvas id="execRegion"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="takeaways" id="exec-takeaways"></div>
+</section>
+
+<!-- ============ 2. TREND ============ -->
+<section class="page" id="page-trend">
+  <h2 class="page-title">OTTP Trend Analysis</h2>
+  <div class="page-subtitle">Miss Rate / On-Time / Missed Lines / Dollar at Risk over time, with baseline reference</div>
+
+  <div class="grid grid-23">
+    <div class="grid grid-stack" style="gap:12px;">
+      <div class="card" id="trend-kpi-current">
+        <div class="kpi-label">Current Period Miss Rate</div>
+        <div class="kpi-value" style="font-size:22px;">—</div>
+        <div class="kpi-sub"></div>
+      </div>
+      <div class="card" id="trend-kpi-prev">
+        <div class="kpi-label">Previous Period Miss Rate</div>
+        <div class="kpi-value" style="font-size:22px;">—</div>
+        <div class="kpi-sub"></div>
+      </div>
+      <div class="card" id="trend-kpi-change">
+        <div class="kpi-label">Change (pp)</div>
+        <div class="kpi-value" style="font-size:22px;">—</div>
+        <div class="kpi-sub"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Monthly Miss Rate <span class="hint">[Line] · red dotted = Baseline 19.85%</span></div>
+      <div class="chart-wrap tall"><canvas id="trendMiss"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid grid-2e">
+    <div class="card">
+      <div class="card-title">Missed Lines per Month <span class="hint">[Column]</span></div>
+      <div class="chart-wrap"><canvas id="trendMissedLines"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Dollar at Risk Trend <span class="hint">[Area]</span></div>
+      <div class="chart-wrap"><canvas id="trendDollar"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Miss Rate by Region (Stacked) <span class="hint">[Multi-line] · compare AMER / EMEA / APAC</span></div>
+    <div class="chart-wrap tall"><canvas id="trendByRegion"></canvas></div>
+  </div>
+</section>
+
+<!-- ============ 3. REGION / COUNTRY ============ -->
+<section class="page" id="page-region">
+  <h2 class="page-title">Region / Country Performance</h2>
+  <div class="page-subtitle">Which geography is driving the OTTP miss? Lift vs AMER baseline by region/country.</div>
+
+  <div class="grid grid-2e">
+    <div class="card">
+      <div class="card-title">Miss Rate by Region <span class="hint">[Bar] · with baseline 19.85%</span></div>
+      <div class="chart-wrap"><canvas id="regionMR"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Lift vs Baseline by Region <span class="hint">[Bar] · positive = worse</span></div>
+      <div class="chart-wrap"><canvas id="regionLift"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid grid-2e">
+    <div class="card">
+      <div class="card-title">Top 15 Problem Countries <span class="hint">[Bar] · by Miss Rate (≥30 orders)</span></div>
+      <div class="chart-wrap tall"><canvas id="countryMR"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Dollar at Risk by Country <span class="hint">[Bar] · Top 15</span></div>
+      <div class="chart-wrap tall"><canvas id="countryDollar"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Country Heatmap <span class="hint">[Matrix] · Country × Region · color = Miss Rate</span></div>
+    <div class="scroll-x" id="countryHeatmap"></div>
+  </div>
+</section>
+
+<!-- ============ 4. PRODUCT ============ -->
+<section class="page" id="page-product">
+  <h2 class="page-title">Product Hierarchy Driver Analysis</h2>
+  <div class="page-subtitle">Which product family is dragging OTTP down? Drill from L1 → L2 → L3.</div>
+
+  <div class="grid grid-2e">
+    <div class="card">
+      <div class="card-title">Miss Rate by Product L1 <span class="hint">[Bar] · 12 categories</span></div>
+      <div class="chart-wrap tall"><canvas id="prodL1"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Missed Lines by Product L1 <span class="hint">[Bar] · absolute volume</span></div>
+      <div class="chart-wrap tall"><canvas id="prodL1Lines"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid grid-2e">
+    <div class="card">
+      <div class="card-title">Top 15 Problem Sub-Categories (L2) <span class="hint">[Bar] · by Miss Rate ≥50 orders</span></div>
+      <div class="chart-wrap tall"><canvas id="prodL2"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Dollar at Risk by Product L1 <span class="hint">[Bar]</span></div>
+      <div class="chart-wrap tall"><canvas id="prodDollar"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Product L1 × Region Heatmap <span class="hint">[Matrix] · color = Miss Rate</span></div>
+    <div class="scroll-x" id="prodRegionMatrix"></div>
+  </div>
+</section>
+
+<!-- ============ 5. CUSTOMER ============ -->
+<section class="page" id="page-customer">
+  <h2 class="page-title">Customer / Ship-to / Sold-to Analysis</h2>
+  <div class="page-subtitle">Which customers and destinations are most affected? Concentration of misses.</div>
+
+  <div class="kpi-row k4">
+    <div class="kpi" id="cust-kpi-soldto"><div class="kpi-label">Distinct Sold-To</div><div class="kpi-value">—</div><div class="kpi-sub small"></div></div>
+    <div class="kpi" id="cust-kpi-shipto"><div class="kpi-label">Distinct Ship-To</div><div class="kpi-value">—</div><div class="kpi-sub small"></div></div>
+    <div class="kpi" id="cust-kpi-top10"><div class="kpi-label">Top 10 Sold-To Miss Share</div><div class="kpi-value">—</div><div class="kpi-sub small"></div></div>
+    <div class="kpi" id="cust-kpi-affected"><div class="kpi-label">Affected Customers</div><div class="kpi-value">—</div><div class="kpi-sub small">≥1 missed line</div></div>
+  </div>
+
+  <div class="grid grid-2e">
+    <div class="card">
+      <div class="card-title">Top 10 Problem Sold-To <span class="hint">[Bar] · by Miss Rate (≥20 orders)</span></div>
+      <div class="chart-wrap tall"><canvas id="custSoldTo"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Top 10 Problem Ship-To <span class="hint">[Bar] · by Miss Rate (≥10 orders)</span></div>
+      <div class="chart-wrap tall"><canvas id="custShipTo"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid grid-2e">
+    <div class="card">
+      <div class="card-title">Top 15 Dollar at Risk Sold-To <span class="hint">[Bar]</span></div>
+      <div class="chart-wrap tall"><canvas id="custDollar"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Miss Concentration (Pareto) <span class="hint">% of misses from Top N</span></div>
+      <div class="chart-wrap tall"><canvas id="custPareto"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. ORDER TYPE ============ -->
+<section class="page" id="page-ordertype">
+  <h2 class="page-title">Order Type / Intercompany Analysis</h2>
+  <div class="page-subtitle">MTO vs MTS vs TS · Intercompany vs External · Priority code comparison</div>
+
+  <div class="grid grid-3">
+    <div class="card">
+      <div class="card-title">Miss Rate by Order Type <span class="hint">MTO / MTS / TS</span></div>
+      <div class="chart-wrap"><canvas id="otMR"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Miss Rate Intercompany vs External <span class="hint">via c22</span></div>
+      <div class="chart-wrap"><canvas id="otIC"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Miss Rate by Priority Code <span class="hint">PRI / NON / ICE / CMB / PER</span></div>
+      <div class="chart-wrap"><canvas id="otPri"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid grid-2e">
+    <div class="card">
+      <div class="card-title">Dollar at Risk by Order Type <span class="hint">[Bar]</span></div>
+      <div class="chart-wrap"><canvas id="otDollar"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Order Type × Intercompany Miss Rate Matrix <span class="hint">[Heatmap]</span></div>
+      <div id="otMatrix"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Driver Comparison <span class="hint">[Bar] · combined effect</span></div>
+    <div class="chart-wrap tall"><canvas id="otCombo"></canvas></div>
+  </div>
+</section>
+
+<!-- ============ 7. CARRIER ============ -->
+<section class="page" id="page-carrier">
+  <h2 class="page-title">Carrier / Route Analysis <span class="badge badge-mis" style="vertical-align:middle;">Data Gap</span></h2>
+  <div class="page-subtitle">⚠️ Carrier and Route fields are NOT present in the current 54-column data pull. Below uses derived Origin Plant × Destination Country as proxy until carrier data is added.</div>
+
+  <div class="alert-banner">
+    <b>⚠️ Data Gap Notice.</b> The current data pull does NOT include carrier code, route ID, or transit mode. This page is built on a derived <code>Origin Plant (c2) × Destination Country (c40)</code> proxy. To enable a real carrier breakdown, the source pull must add: <code>carrier_code / carrier_name / route_id / transit_mode / lane</code>. Items below marked with <span class="badge badge-mis">Need Data</span> require these fields.
+  </div>
+
+  <div class="grid grid-2e">
+    <div class="card">
+      <div class="card-title">Miss Rate by Origin Plant <span class="hint">c2 plant codes (proxy)</span></div>
+      <div class="chart-wrap tall"><canvas id="carPlant"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Top Origin Plant × Destination Country (proxy "Route") <span class="hint">by Miss Rate</span></div>
+      <div class="scroll-y" id="carRouteTable" style="max-height:340px;"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Days-Late Distribution <span class="hint">[Histogram] · c53 days variance among Late orders</span></div>
+    <div class="chart-wrap"><canvas id="carDays"></canvas></div>
+  </div>
+</section>
+
+<!-- ============ 8. DETAIL ============ -->
+<section class="page" id="page-detail">
+  <h2 class="page-title">OTTP Miss Detail / Exception List</h2>
+  <div class="page-subtitle">Order-line drill-through · filter by any slicer to narrow the list</div>
+
+  <div class="grid grid-2e" style="gap:12px;margin-bottom:14px;">
+    <div class="kpi-row k4" style="margin:0;">
+      <div class="kpi" id="detail-kpi-total"><div class="kpi-label">Filtered Lines</div><div class="kpi-value">—</div></div>
+      <div class="kpi" id="detail-kpi-missed"><div class="kpi-label">Missed</div><div class="kpi-value">—</div><div class="kpi-sub small"></div></div>
+      <div class="kpi" id="detail-kpi-severe"><div class="kpi-label">Severe Misses</div><div class="kpi-value">—</div><div class="kpi-sub small">>7 days late</div></div>
+      <div class="kpi" id="detail-kpi-dollar"><div class="kpi-label">$ at Risk</div><div class="kpi-value">—</div></div>
+    </div>
+    <div class="context-card">
+      <b>📌 Drill-through Context</b>
+      <div style="margin-top:8px;" id="detail-context-tags">Filtered by: …</div>
+      <div style="margin-top:8px;font-size:11px;opacity:.85;">In Power BI, right-click any visual on prior pages → Drill through to bring filters here.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      Late Order Lines <span class="hint" id="detail-row-count">[Table] · conditional format: severe (>7 days) red / 1–7 days yellow</span>
+      <div>
+        <button style="border:1px solid var(--border);background:#fff;padding:5px 12px;border-radius:5px;cursor:pointer;font-size:11px;">⬇ Export CSV</button>
+      </div>
+    </div>
+    <div class="scroll-y"><table id="detailTable"></table></div>
+  </div>
+</section>
+
+<!-- ============ 9. METHOD / DICT ============ -->
+<section class="page" id="page-dict">
+  <h2 class="page-title">Methodology &amp; KPI Definitions</h2>
+  <div class="page-subtitle">Data source · field map · KPI formulas · baseline logic · limitations</div>
+
+  <div class="grid grid-3" style="margin-bottom:14px;">
+    <div class="card"><div class="kpi-label">Source</div><div class="kpi-value" style="font-size:18px;">UCSD_OTTP_Data_Pull.csv</div><div class="kpi-sub small">EDW-Agile · 4.28M rows · 54 cols · 2.1 GB</div></div>
+    <div class="card"><div class="kpi-label">AMER Baseline</div><div class="kpi-value" style="font-size:22px;color:var(--negative);">19.85%</div><div class="kpi-sub small">Miss Rate · Source: project scope of work</div></div>
+    <div class="card"><div class="kpi-label">Last Refresh</div><div class="kpi-value" style="font-size:18px;">2026-05-15 08:00</div><div class="kpi-sub small">Refresh_Info[Refresh_DateTime]</div></div>
+  </div>
+
+  <div class="dict-section card">
+    <h4>1. OTTP KPI Definitions</h4>
+    <table>
+      <thead><tr><th>KPI</th><th>Formula</th><th>Notes</th></tr></thead>
+      <tbody id="kpiDict"></tbody>
+    </table>
+  </div>
+
+  <div class="dict-section card">
+    <h4>2. Field Mapping (real 54-column pull → dashboard concepts)</h4>
+    <table>
+      <thead><tr><th>Col #</th><th>Actual Field (guessed)</th><th>Business Meaning</th><th>Used As</th><th>Status</th></tr></thead>
+      <tbody id="fieldDict"></tbody>
+    </table>
+  </div>
+
+  <div class="dict-section card">
+    <h4>3. Known Limitations / Data Gaps</h4>
+    <ul style="margin:0;padding-left:20px;font-size:12.5px;line-height:1.7;">
+      <li><b>No header row in CSV</b> — column names are inferred from value patterns. Need to confirm column dictionary with Thermo Fisher data steward.</li>
+      <li><b>Carrier / Route fields missing</b> — page 7 uses Origin Plant × Destination Country proxy. To enable real carrier analysis, add <code>carrier_code, route_id, transit_mode, lane</code> to the source pull.</li>
+      <li><b>Miss reason / root cause field missing</b> — cannot do automatic root cause classification. Manual classification or NLP on memo fields needed.</li>
+      <li><b>Dollar at Risk computed from c34</b> — assumed to be order line amount in USD. If c34 is local currency, FX conversion is required.</li>
+      <li><b>AMER baseline 19.85% is a fixed reference</b> — if a rolling or segmented baseline is preferred, expose it via a parameter table.</li>
+      <li><b>Promise date logic</b> — uses c43 as the promise date and c49 as the actual ship date. Confirm with business which of c42–c50 is the contractual commitment vs internal target.</li>
+      <li><b>Sample data used in this mockup</b> — 5,000 synthetic OTTP rows generated to mirror the real distributions observed in the first 500K rows of UCSD_OTTP_Data_Pull.csv.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<div class="footer-note">
+  OTTP Performance Dashboard Mockup v1.0 · Built per Master Documentation v1.0 · Synthetic OTTP data — distributions mirror UCSD_OTTP_Data_Pull.csv (4.28M rows, 54 cols). Not the final PBIX.
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============== seed/helpers ==============
+let _seed=42;function rnd(){_seed=(_seed*1664525+1013904223)>>>0;return _seed/4294967296;}
+function pick(a){return a[Math.floor(rnd()*a.length)];}
+function weighted(a){const t=a.reduce((s,x)=>s+x.w,0);let r=rnd()*t;for(const x of a){r-=x.w;if(r<=0)return x;}return a[a.length-1];}
+const COLORS={primary:'#1F4E79',secondary:'#2E75B6',positive:'#70AD47',negative:'#C00000',highlight:'#FFC000',muted:'#A0A6AE'};
+const BASELINE=0.1985;  // AMER baseline
+
+// ============== reference data (matching CSV distributions) ==============
+const REGIONS=[{name:'AMER',w:0.71,baseMR:0.191},{name:'EMEA',w:0.23,baseMR:0.054},{name:'APAC',w:0.05,baseMR:0.073}];
+const COUNTRIES=[
+  // AMER
+  {code:'US',name:'United States',region:'AMER',w:0.40,mrShift:0.00},
+  {code:'CA',name:'Canada',region:'AMER',w:0.06,mrShift:-0.03},
+  {code:'MX',name:'Mexico',region:'AMER',w:0.05,mrShift:0.05},
+  {code:'BR',name:'Brazil',region:'AMER',w:0.04,mrShift:0.12},
+  {code:'AR',name:'Argentina',region:'AMER',w:0.02,mrShift:0.18},
+  {code:'CO',name:'Colombia',region:'AMER',w:0.01,mrShift:0.15},
+  {code:'CL',name:'Chile',region:'AMER',w:0.01,mrShift:0.10},
+  // EMEA
+  {code:'DE',name:'Germany',region:'EMEA',w:0.05,mrShift:-0.02},
+  {code:'UK',name:'United Kingdom',region:'EMEA',w:0.04,mrShift:0.00},
+  {code:'FR',name:'France',region:'EMEA',w:0.03,mrShift:0.00},
+  {code:'IT',name:'Italy',region:'EMEA',w:0.03,mrShift:0.02},
+  {code:'NL',name:'Netherlands',region:'EMEA',w:0.02,mrShift:-0.01},
+  {code:'ES',name:'Spain',region:'EMEA',w:0.02,mrShift:0.04},
+  {code:'SE',name:'Sweden',region:'EMEA',w:0.01,mrShift:-0.02},
+  {code:'CH',name:'Switzerland',region:'EMEA',w:0.01,mrShift:-0.01},
+  {code:'AT',name:'Austria',region:'EMEA',w:0.01,mrShift:0.02},
+  // APAC
+  {code:'CN',name:'China',region:'APAC',w:0.02,mrShift:0.04},
+  {code:'JP',name:'Japan',region:'APAC',w:0.01,mrShift:-0.03},
+  {code:'IN',name:'India',region:'APAC',w:0.01,mrShift:0.10},
+  {code:'AU',name:'Australia',region:'APAC',w:0.005,mrShift:0.06},
+  {code:'KR',name:'South Korea',region:'APAC',w:0.005,mrShift:-0.02},
+];
+const PRODUCT_L1=[
+  {name:'MOLECULAR BIOLOGY',w:0.31,mrShift:0.03},
+  {name:'PROTEIN & CELL ANALYSIS',w:0.29,mrShift:-0.02},
+  {name:'CELL BIOLOGY',w:0.23,mrShift:0.01},
+  {name:'QPCR ASSAYS CONTENT',w:0.07,mrShift:0.05},
+  {name:'GENOMIC WORKFLOW AUTOMATION',w:0.04,mrShift:0.08},
+  {name:'QPCR PLATFORM',w:0.025,mrShift:-0.04},
+  {name:'CE',w:0.02,mrShift:0.00},
+  {name:'NGS',w:0.018,mrShift:0.10},
+  {name:'MICROARRAY',w:0.005,mrShift:-0.05},
+  {name:'ONCOLOGY',w:0.003,mrShift:0.06},
+  {name:'HID',w:0.002,mrShift:0.00},
+  {name:'BID OTHER',w:0.002,mrShift:0.04},
+];
+const SUB_L2={
+  'MOLECULAR BIOLOGY':['CLONING & SERVICES','REAGENTS','NUCLEIC ACID PURIFICATION','RNA INTERFERENCE','PCR ENZYMES'],
+  'PROTEIN & CELL ANALYSIS':['PROTEIN DETECT. & QUANT','PROTEOMICS WORKFLOW','CELL ANALYSIS','TRANSFECTION','PROTEIN INTERACTION'],
+  'CELL BIOLOGY':['CELL CULTURE ESSENTIALS','STEM CELLS','PRIMARY CELLS','SERA','CULTURE MEDIA'],
+  'QPCR ASSAYS CONTENT':['QPCR ASSAYS - PLATFORM','TAQMAN ASSAY','REAL TIME PCR REAGENT'],
+  'GENOMIC WORKFLOW AUTOMATION':['INSTRUMENT','LIQUID HANDLER','AUTOMATION KIT'],
+  'QPCR PLATFORM':['INSTRUMENT','REAL TIME PCR INSTR'],
+  'CE':['CAPILLARY ELECTROPHORESIS','SEQUENCING KIT'],
+  'NGS':['LIBRARY PREP','SEQUENCING REAGENT','BIOINFORMATICS'],
+  'MICROARRAY':['ARRAY','REAGENT KIT'],
+  'ONCOLOGY':['ASSAY','REAGENT'],
+  'HID':['STR KIT','REAGENT'],
+  'BID OTHER':['MISC']
+};
+const ORDER_TYPES=[{name:'MTS',w:0.63,mrShift:-0.02},{name:'MTO',w:0.34,mrShift:0.05},{name:'TS',w:0.03,mrShift:0.08}];
+const PRIORITY=[{name:'NON',w:0.46,mrShift:0.01},{name:'PRI',w:0.23,mrShift:-0.03},{name:'ICE',w:0.18,mrShift:0.06},
+  {name:'CMB',w:0.05,mrShift:0.02},{name:'PER',w:0.04,mrShift:-0.01},{name:'HNO',w:0.02,mrShift:0.10},
+  {name:'ICN',w:0.014,mrShift:0.05},{name:'HPE',w:0.004,mrShift:0.00},{name:'FGL',w:0.002,mrShift:0.08}];
+const PLANTS=['US23','US03','US40','US02','US39','US26','US05','US01','US41','US33','US15','US44','US19','US27','US06','US18'];
+
+// Customers — synthesize 100 with realistic distribution
+const SOLDTO_TIER1=['Thermo Fisher Scientific Inc.','MIT (Massachusetts Institute of Technology)','Aera Therapeutics Inc.','Regeneron Pharmaceuticals Inc','Pfizer Inc.','Moderna Inc.','Bristol Myers Squibb','Merck & Co.','Johnson & Johnson','Eli Lilly'];
+const SOLDTO_TIER2_PFX=['Stanford','Harvard','Yale','UC Berkeley','Duke','Cornell','Northwestern','Genentech','Amgen','Biogen','Vertex','Gilead'];
+const SOLDTO_TIER2_SFX=['University','Research Institute','Biotech','Pharma Inc.','Labs LLC'];
+const SOLDTOS=SOLDTO_TIER1.map(n=>({name:n,tier:5,mrShift:n==='MIT (Massachusetts Institute of Technology)'?0.18:(n.includes('Aera')?0.25:0.0)}));
+for(let i=0;i<90;i++){
+  const n=`${pick(SOLDTO_TIER2_PFX)} ${pick(SOLDTO_TIER2_SFX)} ${i}`;
+  SOLDTOS.push({name:n,tier:1+Math.floor(rnd()*3),mrShift:(rnd()-0.4)*0.15});
+}
+
+const SHIPTOS=[];
+SOLDTOS.forEach((s,i)=>{
+  const n=1+Math.floor(rnd()*3);
+  for(let k=0;k<n;k++) SHIPTOS.push({name:`SHIP ${s.name.toUpperCase().substring(0,30)}-${k+1}`, soldTo:s.name});
+});
+
+// ============== generate 5000 synthetic OTTP lines ==============
+function seasonalDate(){
+  const months=15;  // 15 months: 2025-03 to 2026-05
+  let i=Math.floor(rnd()*months);
+  const m=((2+i)%12)+1;
+  const y=2025+Math.floor((2+i)/12);
+  const day=1+Math.floor(rnd()*28);
+  return new Date(y,m-1,day);
+}
+
+const TXNS=[];
+for(let i=0;i<5000;i++){
+  const country=weighted(COUNTRIES);
+  const region=country.region;
+  const regionDef=REGIONS.find(r=>r.name===region);
+  const prodL1=weighted(PRODUCT_L1);
+  const subList=SUB_L2[prodL1.name];
+  const prodL2=subList[Math.floor(rnd()*subList.length)];
+  const orderType=weighted(ORDER_TYPES);
+  const priority=weighted(PRIORITY);
+  const isIC=rnd()<0.32;  // 32% intercompany
+  const intercompany=isIC?'Intercompany':'Non-Intercompany';
+  const plant=pick(PLANTS);
+  // customer
+  const cw=SOLDTOS.map(s=>({s,w:s.tier*s.tier}));
+  const ct=cw.reduce((a,x)=>a+x.w,0);
+  let cr=rnd()*ct;let sold=SOLDTOS[0];
+  for(const x of cw){cr-=x.w;if(cr<=0){sold=x.s;break;}}
+  const ship=SHIPTOS.filter(s=>s.soldTo===sold.name);
+  const shipTo=ship.length?pick(ship):{name:`SHIP ${sold.name.toUpperCase().substring(0,30)}-1`,soldTo:sold.name};
+
+  // Miss probability — combine many shifts
+  const baseMR=regionDef.baseMR;
+  let pMiss=baseMR + country.mrShift + prodL1.mrShift + orderType.mrShift + priority.mrShift + sold.mrShift;
+  if(isIC) pMiss += 0.04;  // intercompany has higher miss rate
+  pMiss=Math.max(0.01,Math.min(0.65,pMiss));
+  const isLate=rnd()<pMiss;
+
+  const orderDate=seasonalDate();
+  const promiseDate=new Date(orderDate.getTime()+(7+Math.floor(rnd()*14))*86400000);
+  let daysVar;
+  if(isLate){daysVar=1+Math.floor(rnd()*30+rnd()*10);}  // 1-40 days late, skewed
+  else {daysVar=-Math.floor(rnd()*7);}  // -6 to 0 (on time or early)
+  const actualShipDate=new Date(promiseDate.getTime()+daysVar*86400000);
+
+  // amount — log-normal-ish, mean ~$800 median ~$140
+  const amount=Math.round(Math.exp(4.5+rnd()*3.5)*(0.5+rnd()));
+
+  TXNS.push({
+    id:'CN-'+(100000+i),
+    orderDate,promiseDate,actualShipDate,daysVar,
+    ym:orderDate.getFullYear()+'-'+String(orderDate.getMonth()+1).padStart(2,'0'),
+    year:orderDate.getFullYear(),month:orderDate.getMonth()+1,
+    region,country:country.code,countryName:country.name,
+    prodL1:prodL1.name,prodL2,
+    orderType:orderType.name,priority:priority.name,intercompany,
+    plant,
+    soldTo:sold.name,shipTo:shipTo.name,
+    amount,
+    status:isLate?'Late':'On Time',
+    isLate
+  });
+}
+
+// ============== STATE ==============
+const STATE={dateRange:'Last 12 Months',region:'All',catL1:'All',orderType:'All',intercompany:'All'};
+const TODAY=new Date('2026-05-15');
+function getPeriod(){
+  let start,end=TODAY;
+  switch(STATE.dateRange){
+    case 'YTD 2026':       start=new Date('2026-01-01');break;
+    case 'Last 12 Months': start=new Date(TODAY.getFullYear()-1,TODAY.getMonth(),TODAY.getDate());break;
+    case 'Last 24 Months': start=new Date('2024-06-01');break;
+    case 'Q1 2026':        start=new Date('2026-01-01');end=new Date('2026-03-31');break;
+    case '2025 Full Year': start=new Date('2025-01-01');end=new Date('2025-12-31');break;
+    default:               start=new Date('2025-05-15');
+  }
+  const prevEnd=new Date(start);prevEnd.setDate(prevEnd.getDate()-1);
+  const prevLen=end-start;
+  const prevStart=new Date(prevEnd.getTime()-prevLen);
+  return {start,end,prevStart,prevEnd};
+}
+function matchesDim(t){
+  return (STATE.region==='All'||t.region===STATE.region)
+    && (STATE.catL1==='All'||t.prodL1===STATE.catL1)
+    && (STATE.orderType==='All'||t.orderType===STATE.orderType)
+    && (STATE.intercompany==='All'||t.intercompany===STATE.intercompany);
+}
+function getCurrent(){const{start,end}=getPeriod();return TXNS.filter(t=>matchesDim(t)&&t.orderDate>=start&&t.orderDate<=end);}
+function getPrev(){const{prevStart,prevEnd}=getPeriod();return TXNS.filter(t=>matchesDim(t)&&t.orderDate>=prevStart&&t.orderDate<=prevEnd);}
+
+// ============== formatting/aggregation helpers ==============
+const sum=(a,f)=>a.reduce((s,t)=>s+f(t),0);
+const fmtPct=(v,d=2)=>v==null||isNaN(v)?'—':(v*100).toFixed(d)+'%';
+const fmtPP=(v,d=2)=>v==null||isNaN(v)?'—':(v>=0?'+':'')+(v*100).toFixed(d)+' pp';
+const fmtN=v=>v==null||isNaN(v)?'—':v.toLocaleString('en-US',{maximumFractionDigits:0});
+const fmtUSD=v=>{if(v==null||isNaN(v))return '—';const a=Math.abs(v);if(a>=1e9)return '$'+(v/1e9).toFixed(2)+'B';if(a>=1e6)return '$'+(v/1e6).toFixed(2)+'M';if(a>=1000)return '$'+(v/1000).toFixed(1)+'K';return '$'+v.toFixed(0);};
+const missRate=arr=>arr.length?arr.filter(t=>t.isLate).length/arr.length:null;
+const dollarAtRisk=arr=>sum(arr.filter(t=>t.isLate),t=>t.amount);
+const setKPI=(id,v,sub)=>{const e=document.getElementById(id);if(!e)return;e.querySelector('.kpi-value').innerHTML=v;const s=e.querySelector('.kpi-sub');if(s)s.innerHTML=sub||'';};
+const distinctCount=(arr,k)=>new Set(arr.map(t=>t[k])).size;
+
+// chart manager
+Chart.defaults.font.family="'Segoe UI','Helvetica Neue',Arial,sans-serif";
+Chart.defaults.font.size=11;Chart.defaults.color='#595959';
+Chart.defaults.plugins.legend.labels.boxWidth=12;Chart.defaults.plugins.legend.labels.padding=8;
+const CHARTS={};
+function mkChart(id,cfg){if(CHARTS[id]){CHARTS[id].destroy();}const el=document.getElementById(id);if(!el)return;CHARTS[id]=new Chart(el,cfg);}
+
+// ============== EXEC ==============
+function renderExec(){
+  const cur=getCurrent(),prev=getPrev();
+  const total=cur.length,missed=cur.filter(t=>t.isLate).length;
+  const mr=missRate(cur),otp=mr==null?null:(1-mr);
+  const dar=dollarAtRisk(cur);
+  const lift=mr==null?null:(mr-BASELINE);
+  const mrPrev=missRate(prev);
+  const mrChange=(mr==null||mrPrev==null)?null:(mr-mrPrev);
+
+  // Alert banner
+  const alert=document.getElementById('exec-alert');
+  if(mr==null){alert.style.display='none';}
+  else if(mr>BASELINE){
+    alert.style.display='block';
+    alert.innerHTML=`<b>⚠️ Above Baseline.</b> Current Miss Rate <b>${fmtPct(mr)}</b> is <b>${fmtPP(lift)}</b> above the AMER baseline of 19.85%. ${missed.toLocaleString()} missed lines · ${fmtUSD(dar)} at risk under the current filter.`;
+  } else {
+    alert.style.display='block';
+    alert.style.background='#E8F5E0';alert.style.borderLeftColor=COLORS.positive;alert.style.color='#1F4E1F';
+    alert.innerHTML=`<b>✅ Below Baseline.</b> Current Miss Rate <b>${fmtPct(mr)}</b> is <b>${fmtPP(lift)}</b> vs the AMER baseline of 19.85%. ${missed.toLocaleString()} missed lines · ${fmtUSD(dar)} at risk.`;
+  }
+
+  setKPI('exec-kpi-missrate',fmtPct(mr),`Baseline 19.85% · <span class="${lift>0?'kpi-worse':'kpi-better'}">${fmtPP(lift)}</span>`);
+  setKPI('exec-kpi-ontime',fmtPct(otp),`<span class="small">Target ≥ 80.15%</span>`);
+  setKPI('exec-kpi-lines',fmtN(total),`<span class="small">In selected period</span>`);
+  setKPI('exec-kpi-missedlines',fmtN(missed),`<span class="small">${fmtPct(mr,1)} of lines</span>`);
+  setKPI('exec-kpi-dollarrisk',fmtUSD(dar),`<span class="small">Sum of amount on Late lines</span>`);
+  setKPI('exec-kpi-lift',fmtPP(lift),`<span class="small">Current MR − Baseline</span>`);
+
+  // Trend (Miss Rate by month, with baseline ref)
+  const months=getMonthLabels();
+  const monthly=bucketMR(cur,'ym');
+  const mrSeries=months.map(m=>monthly[m]==null?null:monthly[m]);
+  mkChart('execTrend',{
+    type:'line',
+    data:{labels:months.map(formatMonth),datasets:[
+      {label:'Miss Rate',data:mrSeries.map(v=>v==null?null:v*100),borderColor:COLORS.negative,backgroundColor:'rgba(192,0,0,.1)',fill:true,tension:.3,borderWidth:2.5},
+      {label:'AMER Baseline 19.85%',data:months.map(()=>BASELINE*100),borderColor:COLORS.negative,borderDash:[5,4],borderWidth:1.5,pointRadius:0,fill:false}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end'}},
+      scales:{y:{ticks:{callback:v=>v.toFixed(1)+'%'},title:{display:true,text:'Miss Rate %'}}}}
+  });
+
+  // Drivers
+  const drivers=findTopDrivers(cur,5);
+  document.getElementById('exec-drivers').innerHTML=drivers.slice(0,5).map(d=>`
+    <div class="driver-card"><div><b>${d.dim}: ${d.value}</b><br><span class="small">${d.lines.toLocaleString()} lines · ${fmtUSD(d.dar)} at risk</span></div>
+      <div><span class="driver-mr">${fmtPct(d.mr,1)}</span><br><span class="small">${fmtPP(d.lift,1)} vs baseline</span></div></div>`).join('') || '<div class="empty-state">No data</div>';
+
+  // Region Miss Rate
+  const regs=['AMER','EMEA','APAC'];
+  const regMR=regs.map(r=>missRate(cur.filter(t=>t.region===r)));
+  mkChart('execRegion',{
+    type:'bar',data:{labels:regs,datasets:[{label:'Miss Rate',data:regMR.map(v=>v==null?0:v*100),
+      backgroundColor:regMR.map(v=>v==null?'#ccc':v>BASELINE?COLORS.negative:COLORS.positive)}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
+      annotation:{annotations:{baseline:{type:'line',xMin:BASELINE*100,xMax:BASELINE*100,borderColor:COLORS.negative,borderDash:[3,3],borderWidth:1}}}},
+      scales:{x:{ticks:{callback:v=>v.toFixed(1)+'%'}}}}
+  });
+
+  // Takeaways
+  const topDriver=drivers[0];
+  document.getElementById('exec-takeaways').innerHTML=`<b>💡 Auto Key Takeaways (from current filter)</b><ul>
+    <li><b>Where:</b> Highest-impact driver is <b>${topDriver?topDriver.dim+' = '+topDriver.value:'—'}</b> (Miss Rate ${topDriver?fmtPct(topDriver.mr):'—'}, ${topDriver?fmtPP(topDriver.lift):'—'} vs baseline).</li>
+    <li><b>How much:</b> ${fmtUSD(dar)} at risk across ${missed.toLocaleString()} missed lines.</li>
+    <li><b>What changed:</b> Miss Rate ${mrChange==null?'(no prior period)':(mrChange>0?'increased '+fmtPP(mrChange):'decreased '+fmtPP(mrChange))+' vs previous period'}.</li>
+    <li><b>Action priority:</b> Drill into <a href="javascript:switchPage('${topDriver?(topDriver.dim==='Region'?'region':topDriver.dim==='Product L1'?'product':topDriver.dim==='Order Type'?'ordertype':'customer'):'region'}')" style="color:var(--secondary);text-decoration:underline;">${topDriver?topDriver.dim:'—'} page</a> to identify the root cause.</li>
+  </ul>`;
+}
+
+function findTopDrivers(arr,minN){
+  const dims=[
+    {name:'Region',key:'region'},
+    {name:'Product L1',key:'prodL1'},
+    {name:'Order Type',key:'orderType'},
+    {name:'Intercompany',key:'intercompany'},
+    {name:'Country',key:'country'},
+  ];
+  const drivers=[];
+  dims.forEach(d=>{
+    const groups={};
+    arr.forEach(t=>{const k=t[d.key];if(!groups[k])groups[k]={lines:0,late:0,dar:0};groups[k].lines++;if(t.isLate){groups[k].late++;groups[k].dar+=t.amount;}});
+    Object.entries(groups).forEach(([v,g])=>{
+      if(g.lines<minN*5)return;
+      const mr=g.late/g.lines;
+      drivers.push({dim:d.name,value:v,lines:g.lines,mr,dar:g.dar,lift:mr-BASELINE});
+    });
+  });
+  return drivers.sort((a,b)=>b.lift-a.lift).filter(d=>d.lift>0);
+}
+
+function getMonthLabels(){
+  const{start,end}=getPeriod();const m=[];let y=start.getFullYear(),mo=start.getMonth();
+  while(y<end.getFullYear()||(y===end.getFullYear()&&mo<=end.getMonth())){
+    m.push(y+'-'+String(mo+1).padStart(2,'0'));mo++;if(mo>11){mo=0;y++;}
+  }
+  return m;
+}
+function formatMonth(ym){const[y,m]=ym.split('-');return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)-1]+' '+y.substring(2);}
+function bucketMR(arr,key){
+  const g={};arr.forEach(t=>{const k=t[key];if(!g[k])g[k]={tot:0,late:0};g[k].tot++;if(t.isLate)g[k].late++;});
+  const out={};Object.entries(g).forEach(([k,v])=>{out[k]=v.tot?v.late/v.tot:null;});
+  return out;
+}
+function bucketDollar(arr,key){const g={};arr.forEach(t=>{if(!g[t[key]])g[t[key]]=0;if(t.isLate)g[t[key]]+=t.amount;});return g;}
+
+// ============== TREND ==============
+function renderTrend(){
+  const cur=getCurrent(),prev=getPrev();
+  const mr=missRate(cur),mrPrev=missRate(prev);
+  const change=(mr==null||mrPrev==null)?null:(mr-mrPrev);
+  document.getElementById('trend-kpi-current').querySelector('.kpi-value').textContent=fmtPct(mr);
+  document.getElementById('trend-kpi-current').querySelector('.kpi-sub').innerHTML=`<span class="small">Baseline 19.85% · <span class="${mr>BASELINE?'kpi-worse':'kpi-better'}">${fmtPP(mr-BASELINE)}</span></span>`;
+  document.getElementById('trend-kpi-prev').querySelector('.kpi-value').textContent=fmtPct(mrPrev);
+  document.getElementById('trend-kpi-prev').querySelector('.kpi-sub').innerHTML=`<span class="small">Same-length prior period</span>`;
+  document.getElementById('trend-kpi-change').querySelector('.kpi-value').innerHTML=change==null?'—':`<span class="${change>0?'kpi-worse':'kpi-better'}">${fmtPP(change)}</span>`;
+  document.getElementById('trend-kpi-change').querySelector('.kpi-sub').innerHTML=`<span class="small">vs previous period</span>`;
+
+  const months=getMonthLabels();
+  const monthlyMR=bucketMR(cur,'ym');
+  const mrSeries=months.map(m=>monthlyMR[m]==null?null:monthlyMR[m]);
+  mkChart('trendMiss',{
+    type:'line',data:{labels:months.map(formatMonth),datasets:[
+      {label:'Miss Rate',data:mrSeries.map(v=>v==null?null:v*100),borderColor:COLORS.negative,backgroundColor:'rgba(192,0,0,.08)',fill:true,tension:.3,borderWidth:2.5},
+      {label:'Baseline 19.85%',data:months.map(()=>BASELINE*100),borderColor:COLORS.negative,borderDash:[5,4],borderWidth:1.5,pointRadius:0}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end'}},scales:{y:{ticks:{callback:v=>v.toFixed(1)+'%'}}}}
+  });
+
+  // Missed lines per month
+  const missedLines=months.map(m=>cur.filter(t=>t.ym===m&&t.isLate).length);
+  mkChart('trendMissedLines',{
+    type:'bar',data:{labels:months.map(formatMonth),datasets:[{label:'Missed Lines',data:missedLines,backgroundColor:COLORS.negative}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+  });
+
+  // Dollar at risk per month
+  const darByM=months.map(m=>sum(cur.filter(t=>t.ym===m&&t.isLate),t=>t.amount));
+  mkChart('trendDollar',{
+    type:'line',data:{labels:months.map(formatMonth),datasets:[{label:'$ at Risk',data:darByM,borderColor:COLORS.highlight,backgroundColor:'rgba(255,192,0,.2)',fill:true,tension:.3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:fmtUSD}}}}
+  });
+
+  // By region multi-line
+  const regs=['AMER','EMEA','APAC'];const colors={AMER:COLORS.primary,EMEA:COLORS.secondary,APAC:COLORS.highlight};
+  const datasets=regs.map(r=>{
+    const arr=cur.filter(t=>t.region===r);
+    const m=bucketMR(arr,'ym');
+    return {label:r,data:months.map(x=>m[x]==null?null:m[x]*100),borderColor:colors[r],backgroundColor:colors[r],tension:.3,borderWidth:2,fill:false,spanGaps:true};
+  });
+  datasets.push({label:'Baseline 19.85%',data:months.map(()=>BASELINE*100),borderColor:COLORS.negative,borderDash:[5,4],borderWidth:1.5,pointRadius:0,fill:false});
+  mkChart('trendByRegion',{
+    type:'line',data:{labels:months.map(formatMonth),datasets},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end'}},scales:{y:{ticks:{callback:v=>v.toFixed(1)+'%'}}}}
+  });
+}
+
+// ============== REGION ==============
+function renderRegion(){
+  const cur=getCurrent();
+  const regs=['AMER','EMEA','APAC'];
+  const regMR=regs.map(r=>missRate(cur.filter(t=>t.region===r)));
+  mkChart('regionMR',{
+    type:'bar',data:{labels:regs,datasets:[{label:'Miss Rate',data:regMR.map(v=>v==null?0:v*100),
+      backgroundColor:regMR.map(v=>v==null?'#ccc':v>BASELINE?COLORS.negative:COLORS.positive)}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{afterLabel:c=>'Baseline: '+(BASELINE*100).toFixed(2)+'%'}}},
+      scales:{y:{ticks:{callback:v=>v.toFixed(1)+'%'},title:{display:true,text:'Miss Rate %'}}}}
+  });
+  mkChart('regionLift',{
+    type:'bar',data:{labels:regs,datasets:[{label:'Lift vs Baseline (pp)',data:regMR.map(v=>v==null?0:(v-BASELINE)*100),
+      backgroundColor:regMR.map(v=>v==null?'#ccc':v>BASELINE?COLORS.negative:COLORS.positive)}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>(v>=0?'+':'')+v.toFixed(1)+' pp'}}}}
+  });
+
+  // Top 15 countries
+  const cBucket={};cur.forEach(t=>{if(!cBucket[t.countryName])cBucket[t.countryName]={lines:0,late:0,dar:0};cBucket[t.countryName].lines++;if(t.isLate){cBucket[t.countryName].late++;cBucket[t.countryName].dar+=t.amount;}});
+  const cEntries=Object.entries(cBucket).filter(([k,v])=>v.lines>=30).map(([k,v])=>({name:k,mr:v.late/v.lines,dar:v.dar,lines:v.lines})).sort((a,b)=>b.mr-a.mr).slice(0,15);
+  mkChart('countryMR',{
+    type:'bar',data:{labels:cEntries.map(c=>c.name),datasets:[{label:'Miss Rate',data:cEntries.map(c=>c.mr*100),
+      backgroundColor:cEntries.map(c=>c.mr>BASELINE?COLORS.negative:COLORS.highlight)}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>v.toFixed(1)+'%'}}}}
+  });
+  const cDollar=Object.entries(cBucket).map(([k,v])=>({name:k,dar:v.dar})).sort((a,b)=>b.dar-a.dar).slice(0,15);
+  mkChart('countryDollar',{
+    type:'bar',data:{labels:cDollar.map(c=>c.name),datasets:[{label:'$ at Risk',data:cDollar.map(c=>c.dar),backgroundColor:COLORS.primary}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:fmtUSD}}}}
+  });
+
+  // Heatmap: country × region matrix (just shows country with its region color shade)
+  const allCountries=Object.keys(cBucket).sort((a,b)=>(cBucket[b].late/cBucket[b].lines)-(cBucket[a].late/cBucket[a].lines)).slice(0,20);
+  let html='<table style="width:100%;"><thead><tr><th>Country</th><th>Region</th><th class="num">Lines</th><th class="num">Miss Rate</th><th class="num">Lift vs Baseline</th><th class="num">$ at Risk</th></tr></thead><tbody>';
+  allCountries.forEach(c=>{
+    const v=cBucket[c];const mr=v.late/v.lines;const lift=mr-BASELINE;
+    const reg=COUNTRIES.find(x=>x.name===c)?.region||'—';
+    const bg=`rgba(192,0,0,${Math.max(0,Math.min(.7,lift*3))})`;
+    html+=`<tr><td><b>${c}</b></td><td>${reg}</td><td class="num">${v.lines.toLocaleString()}</td>
+      <td class="num" style="background:${bg};color:${lift>0.15?'#fff':'#1F2328'};font-weight:600;">${fmtPct(mr,1)}</td>
+      <td class="num" style="color:${lift>0?'var(--negative)':'var(--positive)'};font-weight:600;">${fmtPP(lift,1)}</td>
+      <td class="num">${fmtUSD(v.dar)}</td></tr>`;
+  });
+  html+='</tbody></table>';
+  document.getElementById('countryHeatmap').innerHTML=html;
+}
+
+// ============== PRODUCT ==============
+function renderProduct(){
+  const cur=getCurrent();
+  const l1Names=PRODUCT_L1.map(p=>p.name);
+  const l1Data=l1Names.map(n=>{const arr=cur.filter(t=>t.prodL1===n);return {name:n,mr:missRate(arr),lines:arr.length,late:arr.filter(t=>t.isLate).length,dar:dollarAtRisk(arr)};}).filter(x=>x.lines>=20).sort((a,b)=>b.mr-a.mr);
+  mkChart('prodL1',{
+    type:'bar',data:{labels:l1Data.map(p=>p.name),datasets:[{label:'Miss Rate',data:l1Data.map(p=>p.mr*100),
+      backgroundColor:l1Data.map(p=>p.mr>BASELINE?COLORS.negative:COLORS.positive)}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>v.toFixed(1)+'%'}}}}
+  });
+  mkChart('prodL1Lines',{
+    type:'bar',data:{labels:l1Data.map(p=>p.name),datasets:[{label:'Missed Lines',data:l1Data.map(p=>p.late),backgroundColor:COLORS.negative}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+  });
+  mkChart('prodDollar',{
+    type:'bar',data:{labels:l1Data.map(p=>p.name),datasets:[{label:'$ at Risk',data:l1Data.map(p=>p.dar),backgroundColor:COLORS.highlight}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:fmtUSD}}}}
+  });
+
+  // L2
+  const l2B={};cur.forEach(t=>{const k=t.prodL2;if(!l2B[k])l2B[k]={lines:0,late:0};l2B[k].lines++;if(t.isLate)l2B[k].late++;});
+  const l2Data=Object.entries(l2B).filter(([k,v])=>v.lines>=50).map(([k,v])=>({name:k,mr:v.late/v.lines,lines:v.lines})).sort((a,b)=>b.mr-a.mr).slice(0,15);
+  mkChart('prodL2',{
+    type:'bar',data:{labels:l2Data.map(p=>p.name),datasets:[{label:'Miss Rate',data:l2Data.map(p=>p.mr*100),
+      backgroundColor:l2Data.map(p=>p.mr>BASELINE?COLORS.negative:COLORS.highlight)}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>v.toFixed(1)+'%'}}}}
+  });
+
+  // Product × Region matrix
+  const regs=['AMER','EMEA','APAC'];
+  let html='<table style="width:100%;"><thead><tr><th>Product L1</th>'+regs.map(r=>`<th class="num">${r}</th>`).join('')+'<th class="num">All</th></tr></thead><tbody>';
+  l1Data.forEach(p=>{
+    html+=`<tr><td><b>${p.name}</b></td>`+regs.map(r=>{
+      const arr=cur.filter(t=>t.prodL1===p.name&&t.region===r);
+      const mr=missRate(arr);
+      const lift=mr==null?0:(mr-BASELINE);
+      const bg=`rgba(192,0,0,${Math.max(0,Math.min(.7,lift*3))})`;
+      return `<td class="num" style="background:${bg};color:${lift>0.15?'#fff':'#1F2328'};font-weight:600;">${mr==null?'—':fmtPct(mr,1)} <span style="font-weight:400;font-size:10px;">(${arr.length})</span></td>`;
+    }).join('')+`<td class="num" style="font-weight:700;color:var(--primary);">${fmtPct(p.mr,1)}</td></tr>`;
+  });
+  html+='</tbody></table>';
+  document.getElementById('prodRegionMatrix').innerHTML=html;
+}
+
+// ============== CUSTOMER ==============
+function renderCustomer(){
+  const cur=getCurrent();
+  setKPI('cust-kpi-soldto',fmtN(distinctCount(cur,'soldTo')));
+  setKPI('cust-kpi-shipto',fmtN(distinctCount(cur,'shipTo')));
+  // Top 10 sold-to miss share
+  const sB={};cur.forEach(t=>{if(!sB[t.soldTo])sB[t.soldTo]={lines:0,late:0,dar:0};sB[t.soldTo].lines++;if(t.isLate){sB[t.soldTo].late++;sB[t.soldTo].dar+=t.amount;}});
+  const allSold=Object.entries(sB).map(([k,v])=>({name:k,...v,mr:v.lines?v.late/v.lines:0})).sort((a,b)=>b.dar-a.dar);
+  const totalLate=cur.filter(t=>t.isLate).length;
+  const top10late=allSold.slice(0,10).reduce((a,s)=>a+s.late,0);
+  setKPI('cust-kpi-top10',fmtPct(totalLate?top10late/totalLate:0,1));
+  const affected=Object.values(sB).filter(v=>v.late>0).length;
+  setKPI('cust-kpi-affected',fmtN(affected));
+
+  // Top 10 problem sold-to
+  const problemSold=Object.entries(sB).filter(([k,v])=>v.lines>=20).map(([k,v])=>({name:k.length>30?k.substring(0,28)+'…':k,mr:v.late/v.lines,lines:v.lines})).sort((a,b)=>b.mr-a.mr).slice(0,10);
+  mkChart('custSoldTo',{
+    type:'bar',data:{labels:problemSold.map(c=>c.name),datasets:[{label:'Miss Rate',data:problemSold.map(c=>c.mr*100),
+      backgroundColor:problemSold.map(c=>c.mr>BASELINE?COLORS.negative:COLORS.highlight)}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>v.toFixed(1)+'%'}}}}
+  });
+
+  // Ship-to
+  const shB={};cur.forEach(t=>{if(!shB[t.shipTo])shB[t.shipTo]={lines:0,late:0};shB[t.shipTo].lines++;if(t.isLate)shB[t.shipTo].late++;});
+  const problemShip=Object.entries(shB).filter(([k,v])=>v.lines>=10).map(([k,v])=>({name:k.length>30?k.substring(0,28)+'…':k,mr:v.late/v.lines,lines:v.lines})).sort((a,b)=>b.mr-a.mr).slice(0,10);
+  mkChart('custShipTo',{
+    type:'bar',data:{labels:problemShip.map(c=>c.name),datasets:[{label:'Miss Rate',data:problemShip.map(c=>c.mr*100),
+      backgroundColor:problemShip.map(c=>c.mr>BASELINE?COLORS.negative:COLORS.highlight)}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>v.toFixed(1)+'%'}}}}
+  });
+
+  // Dollar at risk
+  const top15$=allSold.slice(0,15).map(s=>({name:s.name.length>30?s.name.substring(0,28)+'…':s.name,dar:s.dar}));
+  mkChart('custDollar',{
+    type:'bar',data:{labels:top15$.map(c=>c.name),datasets:[{label:'$ at Risk',data:top15$.map(c=>c.dar),backgroundColor:COLORS.primary}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:fmtUSD}}}}
+  });
+
+  // Pareto
+  const sortedByLate=Object.values(sB).sort((a,b)=>b.late-a.late);
+  const totalL=sortedByLate.reduce((s,x)=>s+x.late,0);
+  let cumP=0;const cumArr=sortedByLate.slice(0,50).map(x=>{cumP+=x.late;return totalL?cumP/totalL*100:0;});
+  mkChart('custPareto',{
+    data:{labels:sortedByLate.slice(0,50).map((_,i)=>'C'+(i+1)),
+      datasets:[
+        {type:'bar',label:'Missed Lines',data:sortedByLate.slice(0,50).map(x=>x.late),backgroundColor:COLORS.secondary,yAxisID:'y'},
+        {type:'line',label:'Cumulative %',data:cumArr,borderColor:COLORS.negative,backgroundColor:COLORS.negative,yAxisID:'y1',tension:.2,borderWidth:2,pointRadius:3}
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end'}},
+      scales:{y:{ticks:{callback:fmtN},title:{display:true,text:'Missed Lines'}},y1:{position:'right',min:0,max:100,grid:{drawOnChartArea:false},ticks:{callback:v=>v+'%'}}}}
+  });
+}
+
+// ============== ORDER TYPE ==============
+function renderOrderType(){
+  const cur=getCurrent();
+  const ots=['MTS','MTO','TS'];
+  const otMR=ots.map(o=>missRate(cur.filter(t=>t.orderType===o)));
+  mkChart('otMR',{
+    type:'bar',data:{labels:ots,datasets:[{label:'Miss Rate',data:otMR.map(v=>v==null?0:v*100),
+      backgroundColor:otMR.map(v=>v==null?'#ccc':v>BASELINE?COLORS.negative:COLORS.positive)}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v.toFixed(1)+'%'}}}}
+  });
+
+  const ic=['Intercompany','Non-Intercompany'];
+  const icMR=ic.map(i=>missRate(cur.filter(t=>t.intercompany===i)));
+  mkChart('otIC',{
+    type:'bar',data:{labels:ic,datasets:[{label:'Miss Rate',data:icMR.map(v=>v==null?0:v*100),
+      backgroundColor:icMR.map(v=>v==null?'#ccc':v>BASELINE?COLORS.negative:COLORS.positive)}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v.toFixed(1)+'%'}}}}
+  });
+
+  const pris=['NON','PRI','ICE','CMB','PER','HNO','ICN','HPE','FGL'];
+  const priMR=pris.map(p=>missRate(cur.filter(t=>t.priority===p)));
+  mkChart('otPri',{
+    type:'bar',data:{labels:pris,datasets:[{label:'Miss Rate',data:priMR.map(v=>v==null?0:v*100),
+      backgroundColor:priMR.map(v=>v==null?'#ccc':v>BASELINE?COLORS.negative:COLORS.positive)}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v.toFixed(1)+'%'}}}}
+  });
+
+  const otDar=ots.map(o=>dollarAtRisk(cur.filter(t=>t.orderType===o)));
+  mkChart('otDollar',{
+    type:'bar',data:{labels:ots,datasets:[{label:'$ at Risk',data:otDar,backgroundColor:COLORS.highlight}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:fmtUSD}}}}
+  });
+
+  // OT × IC matrix
+  let html='<table style="width:100%;"><thead><tr><th>Order Type</th>'+ic.map(i=>`<th class="num">${i}</th>`).join('')+'</tr></thead><tbody>';
+  ots.forEach(o=>{
+    html+=`<tr><td><b>${o}</b></td>`+ic.map(i=>{
+      const arr=cur.filter(t=>t.orderType===o&&t.intercompany===i);
+      const mr=missRate(arr);
+      const lift=mr==null?0:(mr-BASELINE);
+      const bg=`rgba(192,0,0,${Math.max(0,Math.min(.7,lift*3))})`;
+      return `<td class="num" style="background:${bg};color:${lift>0.15?'#fff':'#1F2328'};font-weight:600;">${mr==null?'—':fmtPct(mr,1)} <span style="font-size:10px;font-weight:400;">(${arr.length})</span></td>`;
+    }).join('')+'</tr>';
+  });
+  html+='</tbody></table>';
+  document.getElementById('otMatrix').innerHTML=html;
+
+  // Combined OT+Priority
+  const combos=[];
+  ots.forEach(o=>pris.slice(0,5).forEach(p=>{
+    const arr=cur.filter(t=>t.orderType===o&&t.priority===p);
+    if(arr.length<30)return;
+    combos.push({name:o+'/'+p,mr:missRate(arr),lines:arr.length});
+  }));
+  combos.sort((a,b)=>b.mr-a.mr);
+  mkChart('otCombo',{
+    type:'bar',data:{labels:combos.map(c=>c.name),datasets:[{label:'Miss Rate',data:combos.map(c=>c.mr*100),
+      backgroundColor:combos.map(c=>c.mr>BASELINE?COLORS.negative:COLORS.positive)}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>v.toFixed(1)+'%'}}}}
+  });
+}
+
+// ============== CARRIER ==============
+function renderCarrier(){
+  const cur=getCurrent();
+  // by plant
+  const pB={};cur.forEach(t=>{if(!pB[t.plant])pB[t.plant]={lines:0,late:0};pB[t.plant].lines++;if(t.isLate)pB[t.plant].late++;});
+  const plants=Object.entries(pB).filter(([k,v])=>v.lines>=30).map(([k,v])=>({name:k,mr:v.late/v.lines,lines:v.lines})).sort((a,b)=>b.mr-a.mr);
+  mkChart('carPlant',{
+    type:'bar',data:{labels:plants.map(p=>p.name),datasets:[{label:'Miss Rate',data:plants.map(p=>p.mr*100),
+      backgroundColor:plants.map(p=>p.mr>BASELINE?COLORS.negative:COLORS.positive)}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>v.toFixed(1)+'%'}}}}
+  });
+
+  // plant × country combos
+  const combos={};cur.forEach(t=>{const k=t.plant+' → '+t.country;if(!combos[k])combos[k]={lines:0,late:0,dar:0};combos[k].lines++;if(t.isLate){combos[k].late++;combos[k].dar+=t.amount;}});
+  const cArr=Object.entries(combos).filter(([k,v])=>v.lines>=20).map(([k,v])=>({route:k,...v,mr:v.late/v.lines})).sort((a,b)=>b.mr-a.mr).slice(0,12);
+  let html='<table><thead><tr><th>Plant → Country</th><th class="num">Lines</th><th class="num">Miss Rate</th><th class="num">$ at Risk</th></tr></thead><tbody>';
+  cArr.forEach(r=>{
+    html+=`<tr><td>${r.route}</td><td class="num">${r.lines.toLocaleString()}</td>
+      <td class="num" style="color:${r.mr>BASELINE?'var(--negative)':'var(--positive)'};font-weight:600;">${fmtPct(r.mr,1)}</td>
+      <td class="num">${fmtUSD(r.dar)}</td></tr>`;
+  });
+  html+='</tbody></table>';
+  document.getElementById('carRouteTable').innerHTML=html;
+
+  // Days late histogram
+  const lates=cur.filter(t=>t.isLate).map(t=>t.daysVar);
+  const buckets=[0,0,0,0,0,0,0];const labels=['1–3d','4–7d','8–14d','15–21d','22–30d','31–60d','60+d'];
+  lates.forEach(d=>{if(d<=3)buckets[0]++;else if(d<=7)buckets[1]++;else if(d<=14)buckets[2]++;else if(d<=21)buckets[3]++;else if(d<=30)buckets[4]++;else if(d<=60)buckets[5]++;else buckets[6]++;});
+  mkChart('carDays',{
+    type:'bar',data:{labels,datasets:[{label:'Late Orders',data:buckets,backgroundColor:['#FFC000','#FF8C00','#E04E00','#C00000','#A00000','#7A0000','#3A0000']}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+  });
+}
+
+// ============== DETAIL ==============
+function renderDetail(){
+  const cur=getCurrent();
+  const lates=cur.filter(t=>t.isLate);
+  const severe=lates.filter(t=>t.daysVar>7);
+  setKPI('detail-kpi-total',fmtN(cur.length));
+  document.getElementById('detail-kpi-missed').querySelector('.kpi-value').textContent=fmtN(lates.length);
+  document.getElementById('detail-kpi-missed').querySelector('.kpi-sub').textContent=fmtPct(cur.length?lates.length/cur.length:0,1);
+  document.getElementById('detail-kpi-severe').querySelector('.kpi-value').textContent=fmtN(severe.length);
+  document.getElementById('detail-kpi-severe').querySelector('.kpi-sub').textContent='>7 days · '+fmtPct(lates.length?severe.length/lates.length:0,1)+' of misses';
+  setKPI('detail-kpi-dollar',fmtUSD(sum(lates,t=>t.amount)));
+
+  const tags=[];tags.push(`<span class="context-tag">Date: ${STATE.dateRange}</span>`);
+  if(STATE.region!=='All')tags.push(`<span class="context-tag">Region = ${STATE.region}</span>`);
+  if(STATE.catL1!=='All')tags.push(`<span class="context-tag">Product L1 = ${STATE.catL1}</span>`);
+  if(STATE.orderType!=='All')tags.push(`<span class="context-tag">Order Type = ${STATE.orderType}</span>`);
+  if(STATE.intercompany!=='All')tags.push(`<span class="context-tag">${STATE.intercompany}</span>`);
+  if(tags.length===1)tags.push('<span class="context-tag" style="opacity:.7;">(no dimensional filter)</span>');
+  document.getElementById('detail-context-tags').innerHTML='Filtered by: '+tags.join(' ');
+  document.getElementById('detail-row-count').innerHTML=`[Table] · ${lates.length.toLocaleString()} late lines · severe (>7 days) in red`;
+
+  // Sort by days late descending
+  const sorted=lates.sort((a,b)=>b.daysVar-a.daysVar).slice(0,100);
+  let html=`<thead><tr><th>Order_ID</th><th>Order Date</th><th>Promise Date</th><th>Ship Date</th><th class="num">Days Late</th><th>Sold-To</th><th>Region</th><th>Country</th><th>Product L1</th><th>Order Type</th><th class="num">Amount</th><th>Status</th></tr></thead><tbody>`;
+  sorted.forEach(t=>{
+    const severe=t.daysVar>7;
+    html+=`<tr class="${severe?'severe-late':'late-row'}">
+      <td>${t.id}</td><td>${t.orderDate.toISOString().substring(0,10)}</td><td>${t.promiseDate.toISOString().substring(0,10)}</td><td>${t.actualShipDate.toISOString().substring(0,10)}</td>
+      <td class="num" style="color:${severe?'var(--negative)':'#8B5A00'};font-weight:700;">+${t.daysVar}d</td>
+      <td>${t.soldTo.length>30?t.soldTo.substring(0,28)+'…':t.soldTo}</td>
+      <td>${t.region}</td><td>${t.country}</td><td>${t.prodL1}</td><td>${t.orderType}</td>
+      <td class="num">${fmtUSD(t.amount)}</td>
+      <td><span class="pill ${severe?'pill-severe':'pill-late'}">${severe?'Severe':'Late'}</span></td></tr>`;
+  });
+  if(sorted.length===0)html+='<tr><td colspan="12" style="text-align:center;color:var(--muted);padding:30px;">No late lines match the current filter — all on time! 🎉</td></tr>';
+  if(lates.length>100)html+=`<tr><td colspan="12" style="text-align:center;color:var(--muted);padding:10px;font-style:italic;">… ${(lates.length-100).toLocaleString()} more late lines. Export CSV to see all.</td></tr>`;
+  html+='</tbody>';
+  document.getElementById('detailTable').innerHTML=html;
+}
+
+// ============== DICT ==============
+function renderDict(){
+  const kpis=[
+    ['Total Eligible Lines','COUNT(rows in period)','Filter excludes future-dated orders'],
+    ['Missed Lines','COUNTROWS(WHERE Order_Status = "Late")','c52 = "Late"'],
+    ['On-Time Lines','COUNTROWS(WHERE Order_Status = "On Time")','c52 = "On Time"'],
+    ['OTTP Miss Rate','DIVIDE(Missed Lines, Total Eligible Lines)','BLANK when no eligible lines'],
+    ['On-Time %','1 - OTTP Miss Rate','—'],
+    ['AMER Baseline Miss Rate','19.85% (fixed constant in this version)','Configurable via parameter table in v1.1'],
+    ['Lift vs Baseline','Miss Rate − Baseline (in pp)','Positive = worse than baseline'],
+    ['Dollar at Risk','SUM(Amount on Late lines)','Uses c34 (order line amount). FX assumed USD; confirm with steward'],
+    ['Days Late','c53 days variance (only when positive)','c53 negative = early shipment'],
+    ['Severe Miss','Late line where Days Late > 7','Configurable threshold'],
+  ];
+  document.getElementById('kpiDict').innerHTML=kpis.map(r=>`<tr><td><b>${r[0]}</b></td><td><code>${r[1]}</code></td><td>${r[2]}</td></tr>`).join('');
+
+  const fields=[
+    ['c0','EDW-Agile (constant)','Source system','Drop or metadata only','Available'],
+    ['c1','E1 (constant)','Source instance','Drop or metadata only','Available'],
+    ['c2','Plant Code (16 values)','Origin plant / fulfilment site','Dim_Plant (proxy carrier dim)','Available'],
+    ['c3','Material ID','SKU number','Dim_Product (alt key)','Available'],
+    ['c4','Product Line Group (22)','High-level material category','Dim_Product[Cat_L0]','Available'],
+    ['c5','Order Type (MTO/MTS/TS)','Make-To-Order vs Make-To-Stock','Dim_Order_Type','Available · CORE'],
+    ['c6','Business Segment (BID/GSX/CSD)','Internal segment grouping','Dim_Order_Type','Available'],
+    ['c7','3-letter Product Sub-Code','Sub-product code (709 values)','Dim_Product[Sub_Code]','Available'],
+    ['c8','Product Description','Most granular product name (695)','Dim_Product[Product_Name]','Available'],
+    ['c9','Product Category L1 (12)','Top-level product family','Dim_Product[Cat_L1]','Available · CORE'],
+    ['c10','Product Category L2 (79)','Sub-family','Dim_Product[Cat_L2]','Available · CORE'],
+    ['c11','Product Line L3 (264)','Granular product line','Dim_Product[Cat_L3]','Available'],
+    ['c12','Product Type (5)','BID/GSD/CSD/OEM/SERVICE','Dim_Product[Type]','Available'],
+    ['c13','Division (21)','Division name','Dim_Product[Division]','Available'],
+    ['c14','Code (75)','Possibly inventory class','—','Need Confirmation'],
+    ['c15','Plant code (100/304)','Plant binary','Dim_Plant','Available'],
+    ['c16','Legal Entity','Life Tech Corp vs Inc','Dim_Order_Type','Available'],
+    ['c17','Material Item ID (129K)','Granular SKU/item ID','Dim_Product (PK)','Available'],
+    ['c18','Customer Account ID (1475)','Sold-To numeric ID','Dim_Customer_SoldTo[ID]','Available'],
+    ['c19','Code (20)','Possibly customer class','—','Need Confirmation'],
+    ['c20','Code (10)','—','—','Need Confirmation'],
+    ['c21','Code (452)','—','—','Need Confirmation'],
+    ['c22','Customer Group / Intercompany Flag','361 values incl "USA & EU Intercompany"','Dim_Intercompany (derive)','Available · CORE (derive flag)'],
+    ['c23','Priority Code (45)','PRI/NON/ICE/CMB/PER/HNO/ICN/HPE/FGL','Dim_Order_Type[Priority]','Available · CORE'],
+    ['c24','Code (13)','—','—','Need Confirmation'],
+    ['c25','Hazard Class','Non-Hazardous / Corrosive etc.','Dim_Product[Hazard]','Available'],
+    ['c26','Code (215)','—','—','Need Confirmation'],
+    ['c27','Animal Origin Class','AOF / XYZ / FWS / HUM','Dim_Product[Origin]','Available'],
+    ['c28','Code (34, "RRRRRR" pattern)','Possibly week schedule','—','Need Confirmation'],
+    ['c29','Boolean flag (0/1)','—','—','Need Confirmation'],
+    ['c30','Code (54, 94% null)','Sparse code','—','Sparse - low priority'],
+    ['c31','Date (94% null)','Sparse date','—','Sparse'],
+    ['c32','Code (100% null in sample)','Empty in sample','—','Sparse'],
+    ['c33','Yes/No flag (99.98% No)','Rare yes/no','—','Rare - low priority'],
+    ['c34','Order Amount $','Line amount (USD assumed)','Fact_OTTP[Amount]','Available · CORE'],
+    ['c35','Quantity','Quantity ordered','Fact_OTTP[Quantity]','Available'],
+    ['c36','Quantity (very similar to c35)','Possibly shipped qty','Fact_OTTP[Shipped_Qty]','Need Confirmation'],
+    ['c37','Code (15K integers)','SKU-related or location code','—','Need Confirmation'],
+    ['c38','Ship-To Description','8K unique destinations','Dim_Customer_ShipTo[Name]','Available · CORE'],
+    ['c39','Sold-To Name','5K parent customers','Dim_Customer_SoldTo[Name]','Available · CORE'],
+    ['c40','Country (56 codes)','Destination country code','Dim_Region_Country[Country]','Available · CORE'],
+    ['c41','Region (AMER/EMEA/APAC)','Top-level region','Dim_Region_Country[Region]','Available · CORE'],
+    ['c42','Order Date','Order entry date','Dim_Date / Fact[Order_Date]','Available · CORE'],
+    ['c43','Promise Date','Customer-promised date','Fact_OTTP[Promise_Date]','Available · CORE'],
+    ['c44','Date (~order date)','Possibly schedule date','—','Need Confirmation'],
+    ['c45','Date','Possibly first promise date','—','Need Confirmation'],
+    ['c46','Date (79% null)','Possibly re-scheduled date','—','Sparse'],
+    ['c47','Date (81% null)','Possibly revised date','—','Sparse'],
+    ['c48','Date (95% null)','Sparse','—','Sparse'],
+    ['c49','Actual Ship Date','Final shipment date','Fact_OTTP[Ship_Date]','Available · CORE'],
+    ['c50','Date (close to ship)','Possibly load-confirmed date','Fact_OTTP[Confirmed_Date]','Need Confirmation'],
+    ['c51','Lead Time (1–51)','Days from order to promise','Derived','Available'],
+    ['c52','OTTP Status ("On Time"/"Late")','THE KPI','Fact_OTTP[OTTP_Status]','Available · CORE'],
+    ['c53','Days Variance','Negative = early, positive = late','Fact_OTTP[Days_Variance]','Available · CORE'],
+    ['—','Carrier Code','NOT IN DATA','—','<span class="badge badge-mis">MISSING</span>'],
+    ['—','Route ID / Lane','NOT IN DATA','—','<span class="badge badge-mis">MISSING</span>'],
+    ['—','Transit Mode','NOT IN DATA','—','<span class="badge badge-mis">MISSING</span>'],
+    ['—','Miss Reason / Root Cause','NOT IN DATA','—','<span class="badge badge-mis">MISSING</span>'],
+  ];
+  document.getElementById('fieldDict').innerHTML=fields.map(r=>{
+    const status=r[4]||'Available';
+    let badge=status;
+    if(status.includes('CORE'))badge='<span class="badge badge-ok">Core · Available</span>';
+    else if(status==='Available')badge='<span class="badge">Available</span>';
+    else if(status.includes('Confirmation'))badge='<span class="badge badge-adv">Need Confirmation</span>';
+    else if(status.includes('Sparse')||status.includes('Rare'))badge='<span class="badge badge-opt">Sparse</span>';
+    else if(status.includes('MISSING'))badge=status;
+    return `<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td><span class="small">${r[2]}</span></td><td>${r[3]}</td><td>${badge}</td></tr>`;
+  }).join('');
+}
+
+// ============== filter summary + slicer wiring ==============
+function renderFilterSummary(){
+  const parts=[`<b>${STATE.dateRange}</b>`];
+  if(STATE.region!=='All')parts.push(`Region: <b>${STATE.region}</b>`);
+  if(STATE.catL1!=='All')parts.push(`Product L1: <b>${STATE.catL1}</b>`);
+  if(STATE.orderType!=='All')parts.push(`Order Type: <b>${STATE.orderType}</b>`);
+  if(STATE.intercompany!=='All')parts.push(`<b>${STATE.intercompany}</b>`);
+  document.getElementById('filterSummary').innerHTML='🔍 '+parts.join(' · ');
+  document.querySelectorAll('.slicer').forEach(s=>{
+    const v=s.querySelector('[data-value]').textContent;
+    const key=s.dataset.slicer;
+    const isF=(key==='date'&&v!=='Last 12 Months')||(key!=='date'&&v!=='All');
+    s.classList.toggle('filtered',isF);
+  });
+}
+
+function rerender(){
+  renderFilterSummary();
+  renderExec();renderTrend();renderRegion();renderProduct();renderCustomer();renderOrderType();renderCarrier();renderDetail();
+}
+
+const toast=document.getElementById('toast');let toastTimer=null;
+function showToast(m){toast.textContent=m;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2200);}
+
+document.querySelectorAll('.slicer').forEach(s=>{
+  const valEl=s.querySelector('[data-value]'),menu=s.querySelector('[data-menu]');
+  s.addEventListener('click',e=>{if(e.target.classList.contains('slicer-menu-item'))return;document.querySelectorAll('.slicer').forEach(x=>{if(x!==s)x.classList.remove('open');});s.classList.toggle('open');e.stopPropagation();});
+  menu.querySelectorAll('.slicer-menu-item').forEach(item=>{
+    item.addEventListener('click',e=>{
+      e.stopPropagation();
+      menu.querySelectorAll('.slicer-menu-item').forEach(x=>x.classList.remove('selected'));
+      item.classList.add('selected');valEl.textContent=item.textContent;s.classList.remove('open');
+      const key=s.dataset.slicer;
+      const map={date:'dateRange',region:'region',catL1:'catL1',orderType:'orderType',intercompany:'intercompany'};
+      STATE[map[key]]=item.textContent;
+      showToast(`${s.querySelector('.slicer-label').textContent} → ${item.textContent}`);
+      rerender();
+    });
+  });
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.slicer'))document.querySelectorAll('.slicer').forEach(x=>x.classList.remove('open'));});
+
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  document.querySelectorAll('.slicer').forEach(s=>{
+    const items=s.querySelectorAll('.slicer-menu-item');items.forEach(x=>x.classList.remove('selected'));
+    const def=s.dataset.slicer==='date'?'Last 12 Months':'All';
+    let setDef=false;
+    items.forEach(x=>{if(x.textContent===def&&!setDef){x.classList.add('selected');s.querySelector('[data-value]').textContent=def;setDef=true;}});
+  });
+  Object.assign(STATE,{dateRange:'Last 12 Months',region:'All',catL1:'All',orderType:'All',intercompany:'All'});
+  showToast('All slicers reset');rerender();
+});
+
+const PAGE_TITLES={exec:'OTTP Executive Summary',trend:'OTTP Trend Analysis',region:'Region / Country Performance',product:'Product Hierarchy Driver',customer:'Customer / Ship-to / Sold-to',ordertype:'Order Type / Intercompany',carrier:'Carrier / Route Analysis',detail:'OTTP Miss Detail',dict:'Methodology & KPI Definitions'};
+document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));
+document.querySelectorAll('.kpi.clickable').forEach(c=>c.addEventListener('click',()=>switchPage(c.dataset.jump)));
+function switchPage(p){
+  document.querySelectorAll('.nav-btn').forEach(n=>n.classList.toggle('active',n.dataset.page===p));
+  document.querySelectorAll('.page').forEach(s=>s.classList.toggle('active',s.id==='page-'+p));
+  document.getElementById('pageTitle').textContent=PAGE_TITLES[p];
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+renderDict();rerender();
+</script>
+</body>
+</html>
