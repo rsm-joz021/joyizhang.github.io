@@ -340,6 +340,40 @@ P.plot({
 })
 ```
 
+::: {.callout-note appearance="simple"}
+## Why the main model does not include promotion controls
+
+**What the promotion check changes.** Adding promotion controls shifts every store's
+elasticity toward zero. Among the 86 stores used for pricing, the average moves from −2.79
+to −2.37; every store moves, by between 0.27 and 0.55. The main model is therefore the more
+elastic of the two. What the controls change is the *level* of the elasticities, not
+their *order*. The spread across stores is the same in both versions (a standard deviation
+of 0.20), and the ranking is nearly identical (rank correlation 0.94 among these 86
+stores).
+
+**Why it is a check and not the main model.** The promotion controls rely on the `SALE`
+field, and that field is incomplete. The Dominick's documentation notes that a blank `SALE`
+code does not reliably mean there was no promotion. Some promotion weeks are therefore
+still counted as regular weeks, so the control removes only part of the promotion effect,
+and how much it misses is unknown. Rather than build the analysis on a partly measured
+variable, the main model leaves it out and the promotion version is reported as a check.
+
+**What this means for the rest of the article.**
+
+- **Which stores are more or less price-sensitive does not depend on this choice.** Store
+  groups, which stores get higher or lower prices, and the comparison between pricing
+  strategies all rest on the ranking, and the ranking holds.
+- **The drivers do not change.** In the version of the Step 2 model with promotion terms,
+  education is still the main driver (+0.12, p < 0.001), and income stays slightly negative
+  once education is held fixed.
+- **The overall price level does not change.** The pricing step calibrates cost so that
+  today's average price is the best single price, whatever the average elasticity is.
+- **The size of the price gaps could change.** Closer to −1, the same elasticity gap
+  translates into a larger price gap, so with the promotion-controlled elasticities the
+  store price differences, and the 0.24% gain, would likely be somewhat larger. The
+  figures in this article are those of the main model.
+:::
+
 ## Step 2: What makes a store more price-sensitive?
 
 Knowing *that* stores differ is half the story. The second model asks *which* store
@@ -758,6 +792,54 @@ two alternatives:
 
 The extra gain from store-level prices is about 0.24% whichever cost is used. The rest of
 the article uses the calibrated cost.
+
+::: {.callout-note appearance="simple"}
+## Why Dominick's may price soft drinks below the "optimal" margin
+
+The model says the profit-maximizing margin on soft drinks is about 36%, yet Dominick's
+earns about 17% on regular weeks. This does not have to be a pricing mistake. The model
+looks at one category in isolation, and soft drinks may play a different role in the
+store.
+
+- **Soft drinks bring shoppers in.** Coke and Pepsi are among the most recognized,
+  most frequently bought and most easily compared items in a supermarket. A low price on
+  them is visible, and it can be the reason a shopper chooses one store over another for
+  the weekly trip. Retailers have long treated the category this way: in the grocery trade
+  press, managers describe soft drinks as a "loss leader" that shoppers will make an extra
+  trip for.
+- **The profit is in the basket, not the bottle.** A shopper who comes in for a cheap
+  24-pack usually leaves with other groceries as well. If those other items carry normal
+  margins, the store can earn more on the whole basket than it gives up on soft drinks.
+  Seen this way, a lower soft-drink margin is the price of attracting more trips, and a
+  margin well below 36% can be the better choice for the store as a whole.
+- **What the model cannot see.** The demand model here measures how soft-drink sales
+  respond to soft-drink prices, and the profit function counts only soft-drink margin.
+  Extra trips, other items in the basket, and shoppers choosing Dominick's over a
+  competitor are all outside it. Research on loss leaders finds that such traffic and
+  basket effects can exist but are hard to measure and vary a lot across categories and
+  stores, so this explanation is plausible rather than proven for this data.
+
+**The portfolio effect.** The markup rule treats soft drinks as a stand-alone product and
+counts only soft-drink profit. A store that also counts the profit from everything else in
+the basket should price soft drinks lower than that rule suggests: every extra shopper
+drawn in by a cheaper 24-pack also buys other groceries, so that basket profit works like
+a discount on the cost of soft drinks. The price that is best for the whole store, the
+portfolio, can therefore sit well below the price that is best for soft drinks alone,
+and still earn more in total.
+
+The numbers in this article fit this reading. The calibrated cost that makes today's
+prices optimal is 64% of price, while the data put the true cost at about 83%. If the gap
+is a portfolio effect, today's prices are what a store would choose if each dollar of
+soft drinks sold brought in about 19 cents of profit on other items. That figure is
+implied by the model, not measured: the data contain no basket information to check it.
+
+This is the reason the main case calibrates cost instead of using the margin from the
+data. Taking the observed 17% margin at face value would make the model recommend raising
+every soft-drink price by 29%, ignoring whatever role low soft-drink prices play in
+bringing shoppers into the store. The calibrated cost accepts today's price level as
+given and asks only the narrower question this article is about: whether prices should
+differ *across stores*.
+:::
 
 <details>
 <summary>Show code: profit, cost calibration and group prices</summary>
