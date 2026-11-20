@@ -27,7 +27,6 @@ stores = FileAttachment("files/dominicks/stores.csv").csv({typed: true})
 drivers = FileAttachment("files/dominicks/drivers.csv").csv({typed: true})
 strategies = FileAttachment("files/dominicks/strategies.csv").csv({typed: true})
 granularity = FileAttachment("files/dominicks/granularity_curve.csv").csv({typed: true})
-sensitivity = FileAttachment("files/dominicks/sensitivity.csv").csv({typed: true})
 products = FileAttachment("files/dominicks/products.csv").csv({typed: true})
 productStores = FileAttachment("files/dominicks/product_store_top.csv").csv({typed: true})
 pricingStores = stores.filter(d => d.elasticity_shrunk !== null)
@@ -69,8 +68,8 @@ supermarket sells. Every elasticity, price and profit figure below is a soft-dri
   across 86 stores, compared with the best single price.
 - **Measured elasticity is the right dimension.** Four store groups built on elasticity
   capture 76% of that gain. Dominick's official price tiers capture 10%.
-- **The ranking of pricing strategies is the same** under every one of 24 combinations of
-  assumptions.
+- **Every one of the 1,608 soft-drink products gets a price in every store.** Within a
+  store, all products move by the same percentage, from −3.7% to +4.0% under four groups.
 :::
 
 ## The data
@@ -119,36 +118,78 @@ Two facts from the cleaned data frame the rest of the analysis:
 
 ## Step 1: An elasticity for every store
 
-A price elasticity says how much unit sales change when price changes by 1%. An
-elasticity of −2.8 means a 1% price increase cuts unit sales by about 2.8%. To get one for
-each store, I estimate a log-log demand model separately in every store:
+### What an elasticity is
+
+A price elasticity measures how strongly unit sales react to price, in percentage terms:
+
+$$
+\text{elasticity} = \frac{\%\ \text{change in units sold}}{\%\ \text{change in price}}
+$$
+
+Take the best-selling item in the data, a 24-pack of Pepsi cans at about \$6.09. Suppose
+a store's elasticity is −2.8 and it sells 100 packs a week. Raising the price by 1%, to
+\$6.15, cuts sales by about 2.8%, to roughly 97 packs. Revenue falls too, by about
+1% − 2.8% = −1.8%, because the volume loss is larger than the price gain. Any elasticity
+below −1 is called *elastic*: price increases lose revenue. The closer the elasticity is to
+zero, the less shoppers react to price.
+
+### Why the model is written in logs
+
+Percentages are awkward to put into a regression, but logarithms turn them into plain
+differences: a small change in $\log x$ is approximately the percentage change in $x$.
+So if demand follows
+
+$$
+q = A \cdot p^{\beta} \quad\Longleftrightarrow\quad \log q = \log A + \beta \log p,
+$$
+
+the slope $\beta$ of $\log q$ on $\log p$ is exactly the elasticity. This form also assumes
+the elasticity is the same at every price, which is called *constant elasticity*. A
+comparison of functional forms supports it here: a semi-log model, where only sales are
+logged, fits clearly worse, and adding a squared log-price term barely improves the fit
+(within-R² of 0.301 vs. 0.298).
+
+### The model, store by store
+
+For each store $s$, I regress weekly log units on log price for every soft-drink product
+the store sells:
 
 $$
 \log q_{ut} = \alpha_u + \delta_t + \beta_s \log p_{ut} + \varepsilon_{ut}
-\qquad \text{for each store } s
+\qquad \text{(estimated separately for each store } s\text{)}
 $$
 
-| Symbol | Meaning |
-|---|---|
-| $q_{ut}$ | Units of product $u$ sold in week $t$ (`MOVE`) |
-| $p_{ut}$ | Unit price of product $u$ in week $t$ (`PRICE / QTY`) |
-| $\alpha_u$ | Product fixed effect: each product's normal sales level in this store |
-| $\delta_t$ | Week fixed effect: anything that moves all soft-drink sales in this store that week (weather, holidays, store traffic) |
-| $\beta_s$ | **The store's price elasticity**, the quantity of interest |
-| $\varepsilon_{ut}$ | Everything else |
+| Symbol | Meaning | Example |
+|---|---|---|
+| $u$, $t$ | Product (UPC) and week | Pepsi 24-pack cans; week 250 |
+| $q_{ut}$ | Units of product $u$ sold in week $t$ (`MOVE`) | 120 packs |
+| $p_{ut}$ | Unit price of product $u$ in week $t$ (`PRICE / QTY`) | \$5.99 per pack |
+| $\alpha_u$ | **Product fixed effect**: a separate intercept for each product, its normal sales level in this store | Pepsi 24-packs always sell far more than a niche ginger ale |
+| $\delta_t$ | **Week fixed effect**: a separate intercept for each week, capturing anything that moves all soft-drink sales in this store that week | A hot July 4th week lifts every product |
+| $\beta_s$ | **Store $s$'s price elasticity**, the quantity of interest | −2.8 |
+| $\varepsilon_{ut}$ | Everything the model does not explain | A local event, a stock-out |
 
-**Why log-log.** Taking logs on both sides makes the price coefficient an elasticity
-directly, and it assumes the elasticity is the same at every price level. A comparison of
-functional forms supports this choice. A semi-log model fits clearly worse, and adding a
-squared log-price term barely improves the fit (within-R² of 0.301 vs. 0.298).
+**What the fixed effects buy.** Without them, the regression would compare *different*
+products: cheap 2-liter bottles sell many units and expensive 24-packs fewer, which would
+look like price sensitivity even if no shopper ever reacted to a price change. With a
+product effect, each product is compared only with itself. With a week effect, a week when
+everything sells more (a holiday, a heat wave) is not mistaken for a price response. What
+remains is the question the elasticity should answer: *in weeks when this product was
+cheaper than usual in this store, compared with how that week went for the store's other
+soft drinks, did it sell more than usual, and by how much?* $\beta_s$ averages that
+response across all products in the store.
 
-**What the fixed effects do.** With a product effect and a week effect in the model, the
-elasticity is identified only from *changes* in a product's price over time within one
-store, relative to that store's usual weekly pattern. A product that is always cheap and
-always sells a lot does not make the store look price-sensitive.
+**What "store elasticity" means.** $\beta_s$ is the typical own-price elasticity of a
+soft-drink product in store $s$. It includes shoppers who switch to another soft drink in
+the same store when one product gets more expensive, which is why it is larger in size
+than an elasticity for soft drinks as a whole would be.
 
-**Standard errors** are clustered by product within each store, so repeated weeks of the
-same product are not treated as independent evidence.
+**How much data each store has.** A typical store contributes about 128,000
+product-weeks (between 50,000 and 154,000), covering about 1,200 products over roughly
+380 weeks.
+
+**Standard errors** are clustered by product within each store. The same product observed
+in many weeks is not treated as many independent pieces of evidence.
 
 <details>
 <summary>Show code: the store-by-store regression</summary>
@@ -324,9 +365,43 @@ about a store; they can only enter through their interaction with price. Standar
 are clustered by store, since the characteristics vary only across the 83 stores with
 demographic data.
 
-The core model uses five characteristics: income, education, age 60+, household size and
-distance to Cub Foods. No-car share and poverty are too correlated with income
-(|r| = 0.83 and 0.90) to include together, so they are tested as replacements for income.
+### The store characteristics
+
+Each store's trading area is described by 1990 census figures in the store file. The table
+gives each characteristic's average and range across the 83 stores with demographic data,
+and what one standard deviation (SD), the unit behind every $\gamma_k$, means in plain
+terms.
+
+| Characteristic | What it measures | Average (range) | 1 SD equals | Why it might matter for price sensitivity |
+|---|---|---|---|---|
+| **Income** | Log of median household income | \$40,900 (\$19,300 to \$75,800) | About 28% higher income | Richer households spend a smaller share of their budget on groceries |
+| **Education** | Share of adults with a college degree | 23% (5% to 53%) | 11 percentage points | Linked to income over a lifetime and to the value of shoppers' time |
+| **Age 60+** | Share of residents aged 60 or older | 17% (6% to 31%) | 6 percentage points | Retirees have more time to compare prices, but often lower incomes |
+| **Household size** | Average persons per household | 2.66 (1.55 to 3.31) | 0.26 persons | Larger households buy more soda, so prices weigh more in their budget |
+| **Distance to Cub Foods** | Miles to the nearest Cub Foods, a low-price competitor | 6.2 miles (0.1 to 17.9) | 3.8 miles | A nearby discount store gives shoppers an easy alternative |
+| **No-car share** | Share of households without a car | 11% (1% to 55%) | 13 percentage points | Shoppers without a car cannot easily shop around |
+| **Poverty** | Share of residents below the poverty line | 6% (1% to 21%) | 4 percentage points | Tight budgets make prices matter more |
+
+The "why it might matter" column lists the usual reasons for expecting an effect. The
+model then checks which of them show up in the data. The label for distance to Cub Foods
+is inferred from the variable name in the store file.
+
+**The characteristics move together**, which shapes how the results read:
+
+| | Income | Education | Age 60+ | Household size | Cub distance | No car | Poverty |
+|---|---|---|---|---|---|---|---|
+| **Income** | 1 | 0.66 | −0.15 | 0.32 | −0.31 | −0.83 | −0.90 |
+| **Education** | | 1 | −0.31 | −0.15 | −0.09 | −0.28 | −0.47 |
+| **Age 60+** | | | 1 | −0.37 | 0.30 | 0.18 | 0.16 |
+| **Household size** | | | | 1 | −0.17 | −0.55 | −0.34 |
+| **Cub distance** | | | | | 1 | 0.39 | 0.41 |
+| **No car** | | | | | | 1 | 0.92 |
+
+Income, no-car share and poverty are close to one variable seen from three sides
+(correlations of 0.83 to 0.92 in size). Putting them in one regression would leave the
+model unable to tell them apart. The core model therefore uses five characteristics
+(income, education, age 60+, household size and distance to Cub Foods), and no-car share
+and poverty are tested as replacements for income.
 
 <details>
 <summary>Show code: the interaction model</summary>
@@ -344,11 +419,19 @@ m = pf.feols("log_move ~ log_price + lp_x_income + lp_x_age60 + lp_x_educ"
 
 ### Alone vs. together
 
-Each characteristic is tested twice: **alone**, one at a time, and **together**, with the
-others held fixed. A characteristic that matters alone but not together is probably
-standing in for something else. Filled dots are significant at the 5% level. Lines are 95%
-confidence intervals; for no-car and poverty, the "together" value comes from the model
-where each replaces income.
+Each characteristic is tested twice:
+
+- **Alone**: the model contains only that one characteristic. Its coefficient picks up
+  everything that travels with it. If educated areas also have higher incomes, the
+  "alone" coefficient on education partly reflects income too.
+- **Together**: all five core characteristics are in the model at once. Each coefficient
+  now measures the difference between two stores that are alike in the other four
+  characteristics. This is the part of the effect that belongs to that characteristic.
+
+A characteristic that matters alone but not together was probably standing in for
+something else. Filled dots are significant at the 5% level, and lines are 95% confidence
+intervals. For no-car share and poverty, the "together" value comes from the model where
+each replaces income.
 
 ```{ojs}
 viewof driverMode = Inputs.radio(["Alone", "Together"], {value: "Together", label: "Model"})
@@ -386,11 +469,54 @@ viewof driverMode = Inputs.radio(["Alone", "Together"], {value: "Together", labe
 | **Age 60+** | +0.007 (p = 0.71) | +0.033 (p = 0.12) | No detectable effect. |
 | **Distance to Cub Foods** | +0.009 (p = 0.67) | −0.016 (p = 0.40) | No detectable effect. |
 
+### Reading each characteristic
+
+**Education: the main driver.** One SD more college graduates (11 percentage points) moves
+the elasticity by +0.12 with the other characteristics held fixed. The average store sits
+at about −2.77, so a store one SD above average in education is at about −2.65: a 1% price
+increase costs it about 2.65% of volume instead of 2.77%. Across the full range, from the
+least educated area (5% graduates) to the most educated (53%), that is a difference of
+about 0.5 in elasticity, more than twice the true spread across stores. The effect is
+significant alone and together, and in every variant of the model, including the ones that
+swap income for no-car share or poverty.
+
 Why would educated areas be *less* price-sensitive? Comparing prices takes time, and the
-time of college-educated shoppers is worth more on the job market. Education may also
-capture long-run income and wealth better than one year's median income. The store file's
-shopper-type indices (hurried, avid and constrained shoppers) could test the time-cost
-explanation directly.
+time of college-educated shoppers is worth more on the job market, so shopping around
+costs them more. Education may also capture long-run income and wealth better than one
+year's median income. The store file's shopper-type indices (hurried, avid and constrained
+shoppers) could test the time-cost explanation directly.
+
+**Income: no effect of its own.** Alone, income's coefficient is +0.011 with p = 0.60:
+richer areas are not measurably less price-sensitive. Together, it turns negative (−0.061,
+p = 0.03). The sign flip comes from the 0.66 correlation with education. Alone, income
+borrows some of education's effect. Once education is held fixed, the remaining
+comparison is between two equally educated areas with different incomes, and there the
+richer one is slightly *more* price-sensitive. The practical reading: income by itself is
+not what makes a store less sensitive. Education is.
+
+**No-car share and poverty: income seen from the other side.** Both are strongly
+negatively correlated with income (−0.83 and −0.90). When either replaces income in the
+joint model, it takes a positive coefficient (+0.072 and +0.061), the mirror image of
+income's −0.061. The data cannot separate these three; they carry one shared signal about
+an area's economic position.
+
+**Household size: possible, not confirmed.** Alone, larger households go with higher price
+sensitivity (−0.071, p < 0.001), which fits the idea that families buying more soda feel
+price more. Together, the coefficient shrinks to −0.026 and is no longer significant
+(p = 0.26). Household size moves with car ownership (−0.55), age (−0.37) and income
+(0.32), and once those are held fixed too little of its own effect remains to be sure it
+is real.
+
+**Age 60+: no detectable effect.** Neither alone (+0.007, p = 0.71) nor together (+0.033,
+p = 0.12). Retirees may have more time to compare prices but also differ in many other
+ways, and on balance no effect shows up.
+
+**Distance to Cub Foods: no detectable effect.** If a nearby discount competitor made
+shoppers more price-sensitive, stores farther from Cub Foods would be less sensitive, a
+positive coefficient. The estimates are close to zero alone (+0.009, p = 0.67) and
+together (−0.016, p = 0.40). One possible reason is that Dominick's already prices its
+CubFighter stores, those facing Cub Foods directly, about 3% lower, which may absorb part
+of the competitive pressure.
 
 ### See it store by store
 
@@ -510,28 +636,100 @@ viewof eTry = Inputs.range([-3.6, -2.2], {step: 0.01, value: -2.78, label: "Stor
 
 ### Two safeguards
 
-**Shrinking noisy elasticities.** The highest and lowest estimates in any ranking are
-partly noise. Setting prices from raw estimates would chase that noise. Each store's
-elasticity is therefore pulled toward the chain mean, more strongly when its standard
-error is large. This is an empirical-Bayes estimate:
+Before the markup rule turns elasticities into prices, two adjustments protect the result
+from the model's own weaknesses: noise in the estimates, and a demand curve that is only
+reliable close to observed prices.
+
+#### Safeguard 1: Shrink noisy elasticities toward the mean
+
+**The problem: the optimizer's curse.** Every store elasticity is an estimate with some
+error. When prices are set from estimates, the stores that look the most extreme are, on
+average, the ones whose errors happened to push them outward. The pricing rule then gives
+those stores the largest price changes, and it predicts gains that will not show up in
+reality, because part of the extremeness was noise. Decision scientists call this the
+*optimizer's curse* (or the winner's curse). It appears whenever the option that looks
+best is picked from noisy estimates, and it is a known issue in data-driven pricing,
+targeting and A/B testing.
+
+**The fix: empirical-Bayes shrinkage.** The standard remedy is to pull each estimate toward
+the group average by an amount that depends on how noisy it is. A classic demonstration
+comes from baseball: early-season batting averages, shrunk toward the league average,
+predicted players' rest-of-season averages better than the raw early-season numbers. The
+same logic applies to stores. A store whose estimate is precise keeps most of its own
+value; a store with a noisy estimate is pulled further toward the chain mean:
 
 $$
-e^{\text{shrunk}}_s = \mu + \frac{\tau^2}{\tau^2 + \mathrm{se}_s^2}\left(\hat\beta_s - \mu\right)
+e^{\text{shrunk}}_s = \mu + w_s\left(\hat\beta_s - \mu\right),
+\qquad w_s = \frac{\tau^2}{\tau^2 + \mathrm{se}_s^2}
 $$
 
 | Symbol | Meaning |
 |---|---|
-| $\mu$ | Chain mean elasticity (about −2.79) |
-| $\tau$ | True spread across stores from the heterogeneity test (0.23) |
-| $\mathrm{se}_s$ | Store $s$'s standard error |
-| $\frac{\tau^2}{\tau^2 + \mathrm{se}_s^2}$ | Weight on the store's own estimate: near 1 for precise stores, smaller for noisy ones |
+| $\hat\beta_s$ | Store $s$'s raw elasticity from Step 1 |
+| $\mu$ | Chain mean elasticity, weighted by precision (about −2.79) |
+| $\tau$ | Spread of the *true* store elasticities, from the heterogeneity test (0.23) |
+| $\mathrm{se}_s$ | Store $s$'s standard error: how noisy its estimate is |
+| $w_s$ | Weight on the store's own estimate, between 0 and 1 |
 
-With $\tau = 0.23$ and a typical standard error of 0.12, a typical store keeps about 80%
-of its distance from the mean.
+The weight has a direct reading. $\tau^2$ is the real variation across stores and
+$\mathrm{se}_s^2$ is the noise in store $s$'s estimate, so $w_s$ is the share of the
+store's observed distance from the mean that is believed to be real. Here the weights run
+from 0.59 for the noisiest store to 0.94 for the most precise, with a median of 0.80. The
+largest adjustment is store 59 (Crystal Lake), whose raw estimate of −3.12 has a standard
+error of 0.16 and moves to −3.01. The median store moves by only 0.02.
 
-**A price cap.** Prices may move at most ±10% from the best single price, because a
-constant-elasticity curve is not trustworthy far from prices that were actually
-observed. The cap binds for only two stores.
+The chart shows each store's raw estimate (grey) and shrunk estimate (blue), sorted by the
+raw value. Hover to see the numbers.
+
+```{ojs}
+{
+  const data = pricingStores.slice().sort((a, b) => a.elasticity - b.elasticity)
+    .map(d => ({...d, w: 0.2294 ** 2 / (0.2294 ** 2 + d.se ** 2), id: String(d.store)}))
+  return P.plot({
+    width, height: Math.max(420, data.length * 6.2), marginLeft: 10, marginTop: 28, style: chartStyle, marginBottom: 50,
+    x: {labelAnchor: "center", labelOffset: 40, label: "Elasticity  →  less price-sensitive", domain: [-3.45, -2.2], grid: true},
+    y: {domain: data.map(d => d.id), axis: null},
+    marks: [
+      P.ruleX([-2.789], {stroke: "#eb6834", strokeDasharray: "4 3"}),
+      P.text([-2.789], {x: d => d, frameAnchor: "top", dy: -4, dx: 4, textAnchor: "start", text: () => "chain mean μ", fill: "#eb6834"}),
+      P.arrow(data, {y1: "id", y2: "id", x1: "elasticity", x2: "elasticity_shrunk", stroke: "#86b6ef", headLength: 4, strokeWidth: 1.2}),
+      P.dot(data, {y: "id", x: "elasticity", fill: "#bbb", r: 3}),
+      P.dot(data, {y: "id", x: "elasticity_shrunk", fill: "#2a78d6", r: 3.5, stroke: "white", strokeWidth: 0.6,
+        channels: {Store: "store", City: "city", Raw: d => d.elasticity.toFixed(2), "Std. error": d => d.se.toFixed(3), "Weight on own estimate": d => d.w.toFixed(2)},
+        tip: {format: {y: false, x: d => d.toFixed(2)}}})
+    ]
+  })
+}
+```
+
+Shrinkage narrows the spread of store elasticities from an SD of 0.20 to 0.17, so the
+recommended prices are a little less extreme. It also matters for the reported gain: with
+raw elasticities, store-level pricing would appear to earn 0.35% instead of 0.24%. Much
+of that difference is noise that would not turn into real profit, which is exactly what
+the optimizer's curse predicts.
+
+#### Safeguard 2: Cap price changes at ±10%
+
+**The problem: the demand curve is only trustworthy near observed prices.** A
+constant-elasticity curve is a convenient approximation that fits well in the range of
+prices the stores actually charged. Taken far outside that range, it keeps applying the
+same percentage response at any price, which real demand rarely does. Research in
+marketing has shown that this matters for pricing: log-log demand models fit the data
+well, but an optimizer working with them tends to recommend prices outside the observed
+range, where the model has no evidence and its predictions are least reliable. Practical
+pricing systems handle this with guardrails, bounds on how far a recommended price may
+move from current prices.
+
+**The fix: keep prices where the data are.** Store prices may move at most ±10% from the
+best single price. That bound is well inside what the data cover: half of all observed
+weekly prices lie within ±10% of that product's average price in the same store, and the
+middle 90% span about −29% to +28%, mostly because of promotions. So every recommended
+price sits in a range the model has seen many times.
+
+The cap binds for only two stores, 33 (Chicago) and 137 (Evanston). The markup rule would
+put them about 11% to 12% above the chain price, and the cap holds them at +10%. Removing
+the cap changes the total store-level gain by less than 0.003 percentage points. The cap
+is a guardrail, not a driver of the results.
 
 ### Choosing the cost
 
@@ -640,9 +838,8 @@ profit.
 | Elasticity quartiles | 4 | Each store's own estimated elasticity |
 | Store-level | 86 | Every store has its own price |
 
-The bars show the weekly gain. The whiskers show the 5th to 95th percentile when the true
-elasticities are redrawn 2,000 times from their uncertainty, explained below under
-robustness. Hover for details.
+The bars show the weekly gain, labeled with each strategy's share of the store-level gain.
+Hover for details.
 
 ```{ojs}
 {
@@ -658,10 +855,9 @@ robustness. Hover for details.
     color: {domain: ["Based on measured elasticity", "Based on tiers, zones or demographics"], range: ["#2a78d6", "#a9b4c0"], legend: true},
     marks: [
       P.barX(data, {y: "strategy", x: "gain_weekly", fill: "kind", rx: 3, insetTop: 4, insetBottom: 4,
-        channels: {"Gain (%)": d => `${d.gain_pct.toFixed(3)}%`, "Share of store-level gain": d => `${d.share_of_store_level_gain.toFixed(0)}%`, "Draws with a loss": d => `${d.share_of_draws_with_loss}%`},
+        channels: {"Gain (%)": d => `${d.gain_pct.toFixed(3)}%`, "Share of store-level gain": d => `${d.share_of_store_level_gain.toFixed(0)}%`},
         tip: {format: {fill: false, x: d => `$${d.toFixed(0)}`}}}),
-      P.ruleY(data, {y: "strategy", x1: "lo", x2: "hi", stroke: "#333", strokeWidth: 1.5}),
-      P.text(data, {y: "strategy", x: "hi", text: d => `${d.share_of_store_level_gain.toFixed(0)}%`, dx: 8, textAnchor: "start", fill: "#333"}),
+      P.text(data, {y: "strategy", x: "gain_weekly", text: d => `${d.share_of_store_level_gain.toFixed(0)}%`, dx: 8, textAnchor: "start", fill: "#333"}),
       P.ruleX([0])
     ]
   })
@@ -749,6 +945,38 @@ four elasticity groups, the multipliers are:
 | 2 | 21 | −2.86 to −2.76 | −0.6% |
 | 3 | 22 | −2.75 to −2.70 | +1.0% |
 | 4 (least price-sensitive) | 21 | −2.70 to −2.35 | +4.0% |
+
+### The top 20 products at a glance
+
+![Recommended prices for the 20 best-selling soft drinks under four elasticity groups](files/dominicks/product_prices.png){fig-alt="Dot plot of recommended prices for the top 20 soft drinks by store group, on a log price axis."}
+
+**How to read it.** Each row is one product, ranked by weekly revenue from the top. The
+horizontal axis is the price per unit as sold (one 24-pack, one 2-liter bottle), on a
+**log scale**, so equal distances mean equal *percentage* differences. The hollow circle
+is the chain-average price today, $\bar p_u$. The four dots are the recommended prices for
+stores in each elasticity group, from dark blue (group 1, most price-sensitive) to light
+blue (group 4, least price-sensitive). The label gives the range from the group 1 price to
+the group 4 price.
+
+**What it shows.**
+
+- **The same pattern in every row.** On a log axis, every product shows the identical
+  spacing: group 1 sits 3.7% below the base price, groups 2 and 3 close to it (−0.6% and
+  +1.0%), and group 4 sits 4.0% above. This is the same-percentage rule made visible: the
+  model sets one multiplier per store group and applies it to every product.
+- **Dollar gaps scale with the price.** The same percentages mean different dollar
+  amounts. For a 24-pack at about \$6, group 4 stores charge about \$0.47 more than group 1
+  stores. For a 2-liter bottle at about \$1.15, the gap is about \$0.08.
+- **Four price bands.** The best sellers fall into clear package formats: 2-liter bottles
+  around \$1.10 to \$1.20, 6-packs of cans around \$1.75 to \$2.00, 12-packs around \$3.20 to
+  \$3.50, and 24-packs around \$5.40 to \$6.40. Pepsi and Coke products in the same format
+  have nearly identical base prices, so their recommended prices are nearly identical too.
+- **Asymmetric groups.** The price cut for group 1 (−3.7%) and the increase for group 4
+  (+4.0%) are much larger than the moves for groups 2 and 3, because the middle groups'
+  elasticities sit close to the chain average, while the outer groups hold the extreme
+  stores.
+
+Together these 20 products bring in about 36% of soft-drink revenue.
 
 ### Explore one product
 
@@ -843,79 +1071,6 @@ elasticity-group pricing. The best seller, Pepsi Cola cans in a 24-pack (base pr
 \$6.09), would sell for \$5.86 in group 1 stores and \$6.33 in group 4 stores, earning
 \$30.7 more per week.
 
-## How robust is this?
-
-**Every combination of assumptions.** Four choices are crossed:
-
-| Choice | Options |
-|---|---|
-| Cost | Calibrated (64%), data margin (83%), 80% of price |
-| Elasticities | Shrunk, raw |
-| Price cap | ±10%, none |
-| Baseline window | Full sample, last 52 weeks |
-
-That gives 24 scenarios. Choose one below: the bars show its gains, and the grey dots show
-the same strategy in all 24 scenarios.
-
-```{ojs}
-viewof scen = Inputs.form({
-  cost: Inputs.select(["Calibrated", "PROFIT field", "80% of price"], {label: "Cost"}),
-  elasticities: Inputs.select(["Shrunk", "Raw"], {label: "Elasticities"}),
-  cap: Inputs.select(["+/-10%", "None"], {label: "Price cap"}),
-  window: Inputs.select(["Full sample", "Last 52 weeks"], {label: "Window"})
-})
-```
-
-```{ojs}
-{
-  const names = ["Official price tiers", "Education quartiles", "Demographic-model quartiles", "Price zones", "Elasticity quartiles", "Store-level"]
-  const costOf = v => String(v).startsWith("Calibrated") ? "Calibrated" : String(v).includes("PROFIT") ? "PROFIT field" : "80% of price"
-  const capOf = v => v == null || v === "" ? "None" : String(v)
-  const long = sensitivity.flatMap(row => names.map(n => ({
-    strategy: n, gain: row[`gain_pct: ${n}`], cost: costOf(row.cost), elasticities: row.elasticities, cap: capOf(row.cap), window: row.window,
-    selected: costOf(row.cost) === scen.cost && row.elasticities === scen.elasticities && capOf(row.cap) === scen.cap && row.window === scen.window
-  })))
-  const chosen = long.filter(d => d.selected)
-  return P.plot({
-    width, height: 300, marginLeft: 190, style: chartStyle, marginBottom: 50,
-    x: {labelAnchor: "center", labelOffset: 40, label: "Gain over the best single price (%)", grid: true, domain: [0, 0.37]},
-    y: {domain: names, label: null},
-    marks: [
-      P.barX(chosen, {y: "strategy", x: "gain", fill: "#2a78d6", rx: 3, insetTop: 5, insetBottom: 5,
-        tip: {format: {x: d => `${d.toFixed(3)}%`}}}),
-      P.dot(long, {y: "strategy", x: "gain", stroke: "#666", strokeOpacity: 0.5, r: 3,
-        channels: {Cost: "cost", Elasticities: "elasticities", Cap: "cap", Window: "window"}, tip: {format: {x: d => `${d.toFixed(3)}%`}}}),
-      P.ruleX([0])
-    ]
-  })
-}
-```
-
-- **The ranking of strategies is the same in all 24 scenarios.**
-- **Store-level gains range from 0.19% to 0.35%.** The low end uses only the last year
-  (80 stores); the high end uses raw elasticities, which are more spread out partly
-  because of noise.
-- **The cap hardly matters.** Removing it changes the store-level gain by at most 0.003
-  percentage points.
-
-**A numerical optimizer.** All 86 store prices were also searched jointly with a
-general-purpose optimizer (L-BFGS-B) instead of the markup rule. It lands on the same
-prices; the largest difference is below 10⁻⁷.
-
-**Estimation uncertainty.** Prices are set with estimated elasticities, but the true ones
-are unknown. To test this, the true elasticities are redrawn 2,000 times from their
-estimated uncertainty, and the profit of each strategy's prices is recomputed under each
-draw.
-
-| Prices set by | Expected gain | 5th–95th percentile | Draws with a loss |
-|---|---|---|---|
-| Official price tiers | +0.023% | 0.005% to 0.041% | 1.2% |
-| Education quartiles | +0.032% | 0.008% to 0.056% | 1.35% |
-| Elasticity quartiles | +0.183% | 0.131% to 0.235% | 0% |
-| Store-level | +0.241% | 0.191% to 0.293% | 0% |
-
-Elasticity-based prices never lose money in any draw.
-
 ## What the analysis says
 
 **Should Dominick's charge different prices in different stores?** Store-level prices add
@@ -938,8 +1093,9 @@ prices under the same cost.
 
 ### Limits
 
-- **The same estimates set and judge the prices.** The uncertainty check helps, but a true
-  holdout test would estimate on earlier weeks and evaluate on later ones.
+- **The same estimates set and judge the prices.** Shrinkage reduces the resulting
+  optimism, but a true holdout test would estimate on earlier weeks and evaluate on later
+  ones.
 - **One category, product-level elasticities.** The elasticities include shoppers switching
   between soft drinks in the same store. When all products move together, real volume
   losses are likely smaller, which matters most for the price-level result.
