@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="400" height="250">
+  <rect width="400" height="250" fill="#fcfcfb"/>
+  <g stroke="#e3e3df" stroke-width="1">
+    <line x1="50" y1="40" x2="370" y2="40"/>
+    <line x1="50" y1="95" x2="370" y2="95"/>
+    <line x1="50" y1="150" x2="370" y2="150"/>
+    <line x1="50" y1="205" x2="370" y2="205"/>
+  </g>
+  <g fill="none" stroke-width="2.5" stroke-linecap="round">
+    <path d="M50 52 C 140 95, 250 150, 370 196" stroke="#0d366b"/>
+    <path d="M50 70 C 140 108, 250 152, 370 186" stroke="#1c5cab"/>
+    <path d="M50 88 C 140 120, 250 155, 370 176" stroke="#3987e5"/>
+    <path d="M50 104 C 140 132, 250 158, 370 168" stroke="#86b6ef"/>
+  </g>
+  <line x1="210" y1="30" x2="210" y2="215" stroke="#eb6834" stroke-width="2" stroke-dasharray="5 4"/>
+  <g fill="#eb6834" stroke="#fcfcfb" stroke-width="2">
+    <circle cx="210" cy="129" r="6"/>
+    <circle cx="210" cy="137" r="6"/>
+    <circle cx="210" cy="143" r="6"/>
+    <circle cx="210" cy="148" r="6"/>
+  </g>
+  <text x="50" y="235" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#555">Price</text>
+  <text x="20" y="40" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#555" transform="rotate(-90 20 40)" text-anchor="end">Units</text>
+</svg>

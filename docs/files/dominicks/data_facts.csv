@@ -1,0 +1,16 @@
+fact,value
+Rows in the model sample,10741631.0
+Stores used for pricing (no low-data flag),86.0
+UPCs in those stores,1608.0
+"Gross margin, regular weeks, revenue-weighted (%)",17.42627588990882
+"Gross margin, all weeks, revenue-weighted (%)",9.704655648536573
+"Gross margin, median row (%)",22.020000457763672
+Share of rows with zero or negative margin (%),12.971410021439016
+Share of UPC-weeks with one price in every store (%),51.136277266854144
+UPC-store pairs with fewer than 3 distinct prices,18438.0
+Rows in those pairs (%),2.067748735065717
+Regular price vs. chain median: CubFighter (%),-2.8245986575508586
+Regular price vs. chain median: High (%),0.409511465954071
+Regular price vs. chain median: Low (%),-0.9235439403860956
+Regular price vs. chain median: Medium (%),-0.0942217743623685
+Regular price vs. chain median: No tier (%),-0.4778975284797204

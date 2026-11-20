@@ -2,6 +2,7 @@
 title: "Articles"
 listing:
   contents:
+    - dominicks-store-pricing.qmd
     - mle_blueprinty.qmd
     - abtest.qmd
     - maxdiff-mnl-conjoint.qmd
